@@ -1,0 +1,23 @@
+# Blender backups and temp saves
+*.blend[0-9]
+*.blend[0-9][0-9]
+*.blend@
+quit.blend
+
+# Python (Blender scripts)
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Xcode (for later)
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
