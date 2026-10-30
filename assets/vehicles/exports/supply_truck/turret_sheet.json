@@ -1,0 +1,190 @@
+{
+ "name": "supply_truck",
+ "label": "ok, damaged, wreck",
+ "ppm": 128,
+ "frames": [
+  "ok",
+  "damaged",
+  "wreck"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   1018,
+   964
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   1003,
+   950
+  ],
+  "rects": {
+   "n_ok": [
+    0,
+    0,
+    1003,
+    950
+   ],
+   "n_damaged": [
+    1003,
+    0,
+    1003,
+    950
+   ],
+   "n_wreck": [
+    2006,
+    0,
+    1003,
+    950
+   ],
+   "nw_ok": [
+    0,
+    950,
+    1003,
+    950
+   ],
+   "nw_damaged": [
+    1003,
+    950,
+    1003,
+    950
+   ],
+   "nw_wreck": [
+    2006,
+    950,
+    1003,
+    950
+   ],
+   "w_ok": [
+    0,
+    1900,
+    1003,
+    950
+   ],
+   "w_damaged": [
+    1003,
+    1900,
+    1003,
+    950
+   ],
+   "w_wreck": [
+    2006,
+    1900,
+    1003,
+    950
+   ],
+   "sw_ok": [
+    0,
+    2850,
+    1003,
+    950
+   ],
+   "sw_damaged": [
+    1003,
+    2850,
+    1003,
+    950
+   ],
+   "sw_wreck": [
+    2006,
+    2850,
+    1003,
+    950
+   ],
+   "s_ok": [
+    0,
+    3800,
+    1003,
+    950
+   ],
+   "s_damaged": [
+    1003,
+    3800,
+    1003,
+    950
+   ],
+   "s_wreck": [
+    2006,
+    3800,
+    1003,
+    950
+   ],
+   "se_ok": [
+    0,
+    4750,
+    1003,
+    950
+   ],
+   "se_damaged": [
+    1003,
+    4750,
+    1003,
+    950
+   ],
+   "se_wreck": [
+    2006,
+    4750,
+    1003,
+    950
+   ],
+   "e_ok": [
+    0,
+    5700,
+    1003,
+    950
+   ],
+   "e_damaged": [
+    1003,
+    5700,
+    1003,
+    950
+   ],
+   "e_wreck": [
+    2006,
+    5700,
+    1003,
+    950
+   ],
+   "ne_ok": [
+    0,
+    6650,
+    1003,
+    950
+   ],
+   "ne_damaged": [
+    1003,
+    6650,
+    1003,
+    950
+   ],
+   "ne_wreck": [
+    2006,
+    6650,
+    1003,
+    950
+   ]
+  },
+  "offset": [
+   7.5,
+   7.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Facing = travel direction. Damaged and wreck: play the smoke_puff effect over the hood. The wreck stays on the road as an obstacle.",
+ "length_m": 6.9
+}

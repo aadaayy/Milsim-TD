@@ -1,0 +1,17 @@
+{
+ "name": "scorch",
+ "label": "Scorch decal",
+ "ppm": 128,
+ "cell": [
+  320,
+  320
+ ],
+ "frames": 1,
+ "fps": 0,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": "Ground layer."
+}

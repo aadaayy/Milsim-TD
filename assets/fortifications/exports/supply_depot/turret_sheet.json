@@ -1,0 +1,56 @@
+{
+ "name": "supply_depot",
+ "label": "full, half, empty",
+ "ppm": 128,
+ "frames": [
+  "full",
+  "half",
+  "empty"
+ ],
+ "dirs": [
+  "n"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   806,
+   696
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   632,
+   520
+  ],
+  "rects": {
+   "n_full": [
+    0,
+    0,
+    632,
+    520
+   ],
+   "n_half": [
+    632,
+    0,
+    632,
+    520
+   ],
+   "n_empty": [
+    1264,
+    0,
+    632,
+    520
+   ]
+  },
+  "offset": [
+   22.0,
+   10.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Frames show stock level: full, half, empty."
+}

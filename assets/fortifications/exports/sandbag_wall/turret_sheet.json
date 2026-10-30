@@ -1,0 +1,190 @@
+{
+ "name": "sandbag_wall",
+ "label": "intact, damaged, destroyed",
+ "ppm": 128,
+ "frames": [
+  "intact",
+  "damaged",
+  "destroyed"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   402,
+   344
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   336,
+   314
+  ],
+  "rects": {
+   "n_intact": [
+    0,
+    0,
+    336,
+    314
+   ],
+   "n_damaged": [
+    336,
+    0,
+    336,
+    314
+   ],
+   "n_destroyed": [
+    672,
+    0,
+    336,
+    314
+   ],
+   "nw_intact": [
+    0,
+    314,
+    336,
+    314
+   ],
+   "nw_damaged": [
+    336,
+    314,
+    336,
+    314
+   ],
+   "nw_destroyed": [
+    672,
+    314,
+    336,
+    314
+   ],
+   "w_intact": [
+    0,
+    628,
+    336,
+    314
+   ],
+   "w_damaged": [
+    336,
+    628,
+    336,
+    314
+   ],
+   "w_destroyed": [
+    672,
+    628,
+    336,
+    314
+   ],
+   "sw_intact": [
+    0,
+    942,
+    336,
+    314
+   ],
+   "sw_damaged": [
+    336,
+    942,
+    336,
+    314
+   ],
+   "sw_destroyed": [
+    672,
+    942,
+    336,
+    314
+   ],
+   "s_intact": [
+    0,
+    1256,
+    336,
+    314
+   ],
+   "s_damaged": [
+    336,
+    1256,
+    336,
+    314
+   ],
+   "s_destroyed": [
+    672,
+    1256,
+    336,
+    314
+   ],
+   "se_intact": [
+    0,
+    1570,
+    336,
+    314
+   ],
+   "se_damaged": [
+    336,
+    1570,
+    336,
+    314
+   ],
+   "se_destroyed": [
+    672,
+    1570,
+    336,
+    314
+   ],
+   "e_intact": [
+    0,
+    1884,
+    336,
+    314
+   ],
+   "e_damaged": [
+    336,
+    1884,
+    336,
+    314
+   ],
+   "e_destroyed": [
+    672,
+    1884,
+    336,
+    314
+   ],
+   "ne_intact": [
+    0,
+    2198,
+    336,
+    314
+   ],
+   "ne_damaged": [
+    336,
+    2198,
+    336,
+    314
+   ],
+   "ne_destroyed": [
+    672,
+    2198,
+    336,
+    314
+   ]
+  },
+  "offset": [
+   7.0,
+   4.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Facing = which way the wall runs: n/s walls run left-right on screen.",
+ "length_m": 2.2
+}

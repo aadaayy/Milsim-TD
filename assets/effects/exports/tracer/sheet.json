@@ -1,0 +1,17 @@
+{
+ "name": "tracer",
+ "label": "Tracer",
+ "ppm": 128,
+ "cell": [
+  16,
+  160
+ ],
+ "frames": 1,
+ "fps": 0,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": "Head at the top; stretch along the shot."
+}

@@ -1,0 +1,92 @@
+{
+ "name": "trench_straight",
+ "label": "straight section",
+ "ppm": 128,
+ "frames": [
+  "intact"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   550,
+   480
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   550,
+   480
+  ],
+  "rects": {
+   "n_intact": [
+    0,
+    0,
+    550,
+    480
+   ],
+   "nw_intact": [
+    0,
+    480,
+    550,
+    480
+   ],
+   "w_intact": [
+    0,
+    960,
+    550,
+    480
+   ],
+   "sw_intact": [
+    0,
+    1440,
+    550,
+    480
+   ],
+   "s_intact": [
+    0,
+    1920,
+    550,
+    480
+   ],
+   "se_intact": [
+    0,
+    2400,
+    550,
+    480
+   ],
+   "e_intact": [
+    0,
+    2880,
+    550,
+    480
+   ],
+   "ne_intact": [
+    0,
+    3360,
+    550,
+    480
+   ]
+  },
+  "offset": [
+   0.0,
+   0.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Facing = direction the trench runs (n = up the screen).",
+ "length_m": 3.0
+}

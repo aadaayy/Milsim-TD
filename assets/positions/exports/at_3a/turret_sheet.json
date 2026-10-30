@@ -1,0 +1,189 @@
+{
+ "name": "at_3a",
+ "label": "Level 3A: Guided missile",
+ "ppm": 128,
+ "frames": [
+  "idle",
+  "launch",
+  "flight"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   766,
+   710
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   746,
+   703
+  ],
+  "rects": {
+   "n_idle": [
+    0,
+    0,
+    746,
+    703
+   ],
+   "n_launch": [
+    746,
+    0,
+    746,
+    703
+   ],
+   "n_flight": [
+    1492,
+    0,
+    746,
+    703
+   ],
+   "nw_idle": [
+    0,
+    703,
+    746,
+    703
+   ],
+   "nw_launch": [
+    746,
+    703,
+    746,
+    703
+   ],
+   "nw_flight": [
+    1492,
+    703,
+    746,
+    703
+   ],
+   "w_idle": [
+    0,
+    1406,
+    746,
+    703
+   ],
+   "w_launch": [
+    746,
+    1406,
+    746,
+    703
+   ],
+   "w_flight": [
+    1492,
+    1406,
+    746,
+    703
+   ],
+   "sw_idle": [
+    0,
+    2109,
+    746,
+    703
+   ],
+   "sw_launch": [
+    746,
+    2109,
+    746,
+    703
+   ],
+   "sw_flight": [
+    1492,
+    2109,
+    746,
+    703
+   ],
+   "s_idle": [
+    0,
+    2812,
+    746,
+    703
+   ],
+   "s_launch": [
+    746,
+    2812,
+    746,
+    703
+   ],
+   "s_flight": [
+    1492,
+    2812,
+    746,
+    703
+   ],
+   "se_idle": [
+    0,
+    3515,
+    746,
+    703
+   ],
+   "se_launch": [
+    746,
+    3515,
+    746,
+    703
+   ],
+   "se_flight": [
+    1492,
+    3515,
+    746,
+    703
+   ],
+   "e_idle": [
+    0,
+    4218,
+    746,
+    703
+   ],
+   "e_launch": [
+    746,
+    4218,
+    746,
+    703
+   ],
+   "e_flight": [
+    1492,
+    4218,
+    746,
+    703
+   ],
+   "ne_idle": [
+    0,
+    4921,
+    746,
+    703
+   ],
+   "ne_launch": [
+    746,
+    4921,
+    746,
+    703
+   ],
+   "ne_flight": [
+    1492,
+    4921,
+    746,
+    703
+   ]
+  },
+  "offset": [
+   10.0,
+   3.5
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up)."
+}

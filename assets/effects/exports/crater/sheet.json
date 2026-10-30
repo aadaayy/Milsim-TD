@@ -1,0 +1,17 @@
+{
+ "name": "crater",
+ "label": "Crater decal",
+ "ppm": 128,
+ "cell": [
+  384,
+  384
+ ],
+ "frames": 1,
+ "fps": 0,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": "Ground layer."
+}

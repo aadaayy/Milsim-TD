@@ -1,0 +1,141 @@
+{
+ "name": "barbed_wire",
+ "label": "intact, cut",
+ "ppm": 128,
+ "frames": [
+  "intact",
+  "cut"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   518,
+   510
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   479,
+   488
+  ],
+  "rects": {
+   "n_intact": [
+    0,
+    0,
+    479,
+    488
+   ],
+   "n_cut": [
+    479,
+    0,
+    479,
+    488
+   ],
+   "nw_intact": [
+    0,
+    488,
+    479,
+    488
+   ],
+   "nw_cut": [
+    479,
+    488,
+    479,
+    488
+   ],
+   "w_intact": [
+    0,
+    976,
+    479,
+    488
+   ],
+   "w_cut": [
+    479,
+    976,
+    479,
+    488
+   ],
+   "sw_intact": [
+    0,
+    1464,
+    479,
+    488
+   ],
+   "sw_cut": [
+    479,
+    1464,
+    479,
+    488
+   ],
+   "s_intact": [
+    0,
+    1952,
+    479,
+    488
+   ],
+   "s_cut": [
+    479,
+    1952,
+    479,
+    488
+   ],
+   "se_intact": [
+    0,
+    2440,
+    479,
+    488
+   ],
+   "se_cut": [
+    479,
+    2440,
+    479,
+    488
+   ],
+   "e_intact": [
+    0,
+    2928,
+    479,
+    488
+   ],
+   "e_cut": [
+    479,
+    2928,
+    479,
+    488
+   ],
+   "ne_intact": [
+    0,
+    3416,
+    479,
+    488
+   ],
+   "ne_cut": [
+    479,
+    3416,
+    479,
+    488
+   ]
+  },
+  "offset": [
+   19.5,
+   11.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up).",
+ "length_m": 3.0
+}

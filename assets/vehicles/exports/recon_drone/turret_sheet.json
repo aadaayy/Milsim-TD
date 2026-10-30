@@ -1,0 +1,141 @@
+{
+ "name": "recon_drone",
+ "label": "rotor frames",
+ "ppm": 128,
+ "frames": [
+  "rotor1",
+  "rotor2"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   274,
+   276
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   232,
+   247
+  ],
+  "rects": {
+   "n_rotor1": [
+    0,
+    0,
+    232,
+    247
+   ],
+   "n_rotor2": [
+    232,
+    0,
+    232,
+    247
+   ],
+   "nw_rotor1": [
+    0,
+    247,
+    232,
+    247
+   ],
+   "nw_rotor2": [
+    232,
+    247,
+    232,
+    247
+   ],
+   "w_rotor1": [
+    0,
+    494,
+    232,
+    247
+   ],
+   "w_rotor2": [
+    232,
+    494,
+    232,
+    247
+   ],
+   "sw_rotor1": [
+    0,
+    741,
+    232,
+    247
+   ],
+   "sw_rotor2": [
+    232,
+    741,
+    232,
+    247
+   ],
+   "s_rotor1": [
+    0,
+    988,
+    232,
+    247
+   ],
+   "s_rotor2": [
+    232,
+    988,
+    232,
+    247
+   ],
+   "se_rotor1": [
+    0,
+    1235,
+    232,
+    247
+   ],
+   "se_rotor2": [
+    232,
+    1235,
+    232,
+    247
+   ],
+   "e_rotor1": [
+    0,
+    1482,
+    232,
+    247
+   ],
+   "e_rotor2": [
+    232,
+    1482,
+    232,
+    247
+   ],
+   "ne_rotor1": [
+    0,
+    1729,
+    232,
+    247
+   ],
+   "ne_rotor2": [
+    232,
+    1729,
+    232,
+    247
+   ]
+  },
+  "offset": [
+   13.0,
+   6.5
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Drawn low for the sprite; scale the shadow offset in game for altitude.",
+ "altitude_rendered_m": 0.55
+}

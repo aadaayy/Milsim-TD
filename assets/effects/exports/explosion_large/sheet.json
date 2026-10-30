@@ -1,0 +1,17 @@
+{
+ "name": "explosion_large",
+ "label": "Explosion (artillery, missile)",
+ "ppm": 128,
+ "cell": [
+  560,
+  560
+ ],
+ "frames": 12,
+ "fps": 14,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": ""
+}

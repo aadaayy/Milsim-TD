@@ -1,0 +1,17 @@
+{
+ "name": "burning_ground",
+ "label": "Burning ground",
+ "ppm": 128,
+ "cell": [
+  320,
+  320
+ ],
+ "frames": 6,
+ "fps": 12,
+ "loop": true,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": "Ground layer, under zombies."
+}

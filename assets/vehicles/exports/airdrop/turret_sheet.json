@@ -1,0 +1,49 @@
+{
+ "name": "airdrop",
+ "label": "falling, landed",
+ "ppm": 128,
+ "frames": [
+  "falling",
+  "landed"
+ ],
+ "dirs": [
+  "n"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   824,
+   930
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   694,
+   930
+  ],
+  "rects": {
+   "n_falling": [
+    0,
+    0,
+    694,
+    930
+   ],
+   "n_landed": [
+    694,
+    0,
+    694,
+    930
+   ]
+  },
+  "offset": [
+   65.0,
+   0.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Falling frame: slide the whole sprite down the screen as it lands; the shadow stays on the ground."
+}

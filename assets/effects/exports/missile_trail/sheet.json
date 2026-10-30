@@ -1,0 +1,17 @@
+{
+ "name": "missile_trail",
+ "label": "Missile trail",
+ "ppm": 128,
+ "cell": [
+  96,
+  420
+ ],
+ "frames": 6,
+ "fps": 12,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": "Exhaust end at the bottom."
+}

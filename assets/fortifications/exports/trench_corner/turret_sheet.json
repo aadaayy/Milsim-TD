@@ -1,0 +1,91 @@
+{
+ "name": "trench_corner",
+ "label": "corner section",
+ "ppm": 128,
+ "frames": [
+  "intact"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   544,
+   476
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   544,
+   476
+  ],
+  "rects": {
+   "n_intact": [
+    0,
+    0,
+    544,
+    476
+   ],
+   "nw_intact": [
+    0,
+    476,
+    544,
+    476
+   ],
+   "w_intact": [
+    0,
+    952,
+    544,
+    476
+   ],
+   "sw_intact": [
+    0,
+    1428,
+    544,
+    476
+   ],
+   "s_intact": [
+    0,
+    1904,
+    544,
+    476
+   ],
+   "se_intact": [
+    0,
+    2380,
+    544,
+    476
+   ],
+   "e_intact": [
+    0,
+    2856,
+    544,
+    476
+   ],
+   "ne_intact": [
+    0,
+    3332,
+    544,
+    476
+   ]
+  },
+  "offset": [
+   0.0,
+   0.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Facing n = arms run north and east; rotate through the 8 renders for the other turns (the diagonal facings are spare)."
+}

@@ -1,0 +1,53 @@
+{
+ "name": "minefield",
+ "label": "armed, cleared",
+ "ppm": 128,
+ "frames": [
+  "armed",
+  "cleared"
+ ],
+ "dirs": [
+  "n"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   570,
+   510
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   510,
+   492
+  ],
+  "rects": {
+   "n_armed": [
+    0,
+    0,
+    510,
+    492
+   ],
+   "n_cleared": [
+    510,
+    0,
+    510,
+    492
+   ]
+  },
+  "offset": [
+   14.0,
+   9.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up).",
+ "size_m": [
+  3.0,
+  3.0
+ ]
+}

@@ -1,0 +1,140 @@
+{
+ "name": "spotlight",
+ "label": "off, on",
+ "ppm": 128,
+ "frames": [
+  "off",
+  "on"
+ ],
+ "dirs": [
+  "n",
+  "nw",
+  "w",
+  "sw",
+  "s",
+  "se",
+  "e",
+  "ne"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   1588,
+   1380
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   1587,
+   1380
+  ],
+  "rects": {
+   "n_off": [
+    0,
+    0,
+    1587,
+    1380
+   ],
+   "n_on": [
+    1587,
+    0,
+    1587,
+    1380
+   ],
+   "nw_off": [
+    0,
+    1380,
+    1587,
+    1380
+   ],
+   "nw_on": [
+    1587,
+    1380,
+    1587,
+    1380
+   ],
+   "w_off": [
+    0,
+    2760,
+    1587,
+    1380
+   ],
+   "w_on": [
+    1587,
+    2760,
+    1587,
+    1380
+   ],
+   "sw_off": [
+    0,
+    4140,
+    1587,
+    1380
+   ],
+   "sw_on": [
+    1587,
+    4140,
+    1587,
+    1380
+   ],
+   "s_off": [
+    0,
+    5520,
+    1587,
+    1380
+   ],
+   "s_on": [
+    1587,
+    5520,
+    1587,
+    1380
+   ],
+   "se_off": [
+    0,
+    6900,
+    1587,
+    1380
+   ],
+   "se_on": [
+    1587,
+    6900,
+    1587,
+    1380
+   ],
+   "e_off": [
+    0,
+    8280,
+    1587,
+    1380
+   ],
+   "e_on": [
+    1587,
+    8280,
+    1587,
+    1380
+   ],
+   "ne_off": [
+    0,
+    9660,
+    1587,
+    1380
+   ],
+   "ne_on": [
+    1587,
+    9660,
+    1587,
+    1380
+   ]
+  },
+  "offset": [
+   0.5,
+   0.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up). Beam reaches about 4.6 m; draw the beam frame additively at night."
+}

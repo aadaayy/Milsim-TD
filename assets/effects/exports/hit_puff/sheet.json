@@ -1,0 +1,17 @@
+{
+ "name": "hit_puff",
+ "label": "Zombie hit",
+ "ppm": 128,
+ "cell": [
+  96,
+  96
+ ],
+ "frames": 5,
+ "fps": 20,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": ""
+}

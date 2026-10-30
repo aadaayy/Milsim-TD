@@ -1,0 +1,61 @@
+{
+ "name": "command_post",
+ "label": "intact, damaged, destroyed",
+ "ppm": 128,
+ "frames": [
+  "intact",
+  "damaged",
+  "destroyed"
+ ],
+ "dirs": [
+  "n"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   884,
+   1116
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   873,
+   868
+  ],
+  "rects": {
+   "n_intact": [
+    0,
+    0,
+    873,
+    868
+   ],
+   "n_damaged": [
+    873,
+    0,
+    873,
+    868
+   ],
+   "n_destroyed": [
+    1746,
+    0,
+    873,
+    868
+   ]
+  },
+  "offset": [
+   -5.5,
+   124.0
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up).",
+ "size_m": [
+  3.0,
+  2.4
+ ],
+ "mast_height_m": 5.0
+}

@@ -1,0 +1,17 @@
+{
+ "name": "smoke_puff",
+ "label": "Smoke puff",
+ "ppm": 128,
+ "cell": [
+  192,
+  192
+ ],
+ "frames": 8,
+ "fps": 12,
+ "loop": false,
+ "anchor": [
+  0.5,
+  0.5
+ ],
+ "note": "Gunsmoke, dust, impacts."
+}

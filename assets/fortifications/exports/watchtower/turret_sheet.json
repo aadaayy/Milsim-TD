@@ -1,0 +1,50 @@
+{
+ "name": "watchtower",
+ "label": "intact, damaged",
+ "ppm": 128,
+ "frames": [
+  "intact",
+  "damaged"
+ ],
+ "dirs": [
+  "n"
+ ],
+ "base": {
+  "file": "base.png",
+  "size": [
+   726,
+   868
+  ],
+  "anchor": [
+   0.5,
+   0.5
+  ]
+ },
+ "turret": {
+  "file": "turret_sheet.png",
+  "cell": [
+   557,
+   785
+  ],
+  "rects": {
+   "n_intact": [
+    0,
+    0,
+    557,
+    785
+   ],
+   "n_damaged": [
+    557,
+    0,
+    557,
+    785
+   ]
+  },
+  "offset": [
+   84.5,
+   41.5
+  ]
+ },
+ "note": "Draw base, then the turret cell for the facing and frame at base position + offset. Facing names are where the weapon points on screen (n = up).",
+ "deck_height_m": 3.23
+}
