@@ -60,7 +60,8 @@ struct CommandPostHealth: View {
 /// Supply, the wave button, pause and speed: everything a thumb needs, along the bottom.
 struct ControlBar: View {
     let session: GameSession
-    /// The folded Duo's side bar: the wave button on its own row, the rest under it.
+    /// The folded Duo's side bar: the wave button on its own row, pause and
+    /// speed under it. The side bar shows supply at its top instead.
     var column = false
 
     var body: some View {
@@ -68,7 +69,6 @@ struct ControlBar: View {
             VStack(spacing: 8) {
                 waveButton
                 HStack(spacing: 8) {
-                    supply.frame(maxWidth: .infinity)
                     pauseAndSpeed
                 }
             }
@@ -99,20 +99,28 @@ struct ControlBar: View {
     private var pauseAndSpeed: some View {
         Button(action: session.togglePause) {
             Image(systemName: session.isPaused ? "play.fill" : "pause.fill")
+                .frame(maxWidth: column ? .infinity : nil)
         }
         .buttonStyle(IconButtonStyle())
         .accessibilityLabel(session.isPaused ? "Resume" : "Pause")
         .accessibilityIdentifier("pause")
         Button(action: session.cycleSpeed) {
             Text("\(session.speed)×").font(.readout(16))
+                .frame(maxWidth: column ? .infinity : nil)
         }
         .buttonStyle(IconButtonStyle())
         .accessibilityLabel("Speed \(session.speed) times")
         .accessibilityIdentifier("speed")
     }
 
-    @ViewBuilder
     private var waveButton: some View {
+        waveButtonContent
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+    }
+
+    @ViewBuilder
+    private var waveButtonContent: some View {
         switch session.phase {
         case .build:
             Button("START WAVE 1", action: session.startNextWave)
@@ -154,6 +162,8 @@ struct ContextPanel: View {
     var roomy = false
     /// The folded Duo's narrow side bar: things stack instead of sitting side by side.
     var column = false
+    /// False when the next wave is shown elsewhere (under the folded Duo's map).
+    var showsIntel = true
 
     var body: some View {
         Group {
@@ -163,7 +173,14 @@ struct ContextPanel: View {
             case .position(let id):
                 PositionCard(session: session, id: id, roomy: roomy, column: column)
             case .none:
-                WaveIntel(session: session, roomy: roomy, column: column)
+                if showsIntel {
+                    WaveIntel(session: session, roomy: roomy, column: column)
+                } else {
+                    Text("Tap a pad on the map to build there. Tap a position to see its card.")
+                        .font(.system(size: 13)).foregroundStyle(Theme.dim)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
         .padding(.horizontal, 10)
@@ -181,7 +198,7 @@ struct BuildMenu: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("BUILD ON PAD \(slot + 1)").font(.stencil(13)).foregroundStyle(Theme.dim)
+                Text(column ? "PAD \(slot + 1)" : "BUILD ON PAD \(slot + 1)").font(.stencil(13)).foregroundStyle(Theme.dim)
                 Spacer()
                 Button("Cancel") { session.selection = .none }
                     .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.sand)
@@ -221,10 +238,10 @@ struct BuildMenu: View {
                 .panel(raised: true)
             } else if column {
                 HStack(spacing: 8) {
-                    Portrait(name: first.sprite, size: 48)
+                    Portrait(name: first.sprite, size: 42)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(type.name.uppercased()).font(.stencil(14)).foregroundStyle(Theme.text)
-                            .lineLimit(1).minimumScaleFactor(0.7)
+                            .lineLimit(2).minimumScaleFactor(0.7)
                         Text(type.role).font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.sand)
                             .lineLimit(1).minimumScaleFactor(0.8)
                         SupplyLabel(amount: first.cost, size: 13)
@@ -267,19 +284,23 @@ struct PositionCard: View {
         if let position = session.game.position(id: id), let type = session.catalog.position(position.type),
            let level = session.game.levelSpec(of: position) {
             VStack(alignment: .leading, spacing: roomy ? 10 : 6) {
-                HStack(alignment: .top, spacing: 10) {
-                    Portrait(name: level.sprite, size: roomy ? 72 : 52)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(type.name.uppercased()).font(.stencil(roomy ? 18 : 15)).foregroundStyle(Theme.text)
-                        HStack(spacing: 4) {
-                            Image("badge_level_\(position.level + 1)").resizable().frame(width: 16, height: 16)
-                            Text("Level \(position.level + 1): \(level.title)")
-                                .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
+                if column {
+                    columnHeader(type: type, position: position, level: level)
+                } else {
+                    HStack(alignment: .top, spacing: 10) {
+                        Portrait(name: level.sprite, size: roomy ? 72 : 52)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(type.name.uppercased()).font(.stencil(roomy ? 18 : 15)).foregroundStyle(Theme.text)
+                            HStack(spacing: 4) {
+                                Image("badge_level_\(position.level + 1)").resizable().frame(width: 16, height: 16)
+                                Text("Level \(position.level + 1): \(level.title)")
+                                    .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
+                            }
+                            StatRow(level: level, kills: position.kills)
                         }
-                        if !column { StatRow(level: level, kills: position.kills) }
+                        Spacer(minLength: 0)
+                        if !roomy { actions(position) }
                     }
-                    Spacer(minLength: 0)
-                    if !roomy && !column { actions(position) }
                 }
                 if column { StatRow(level: level, kills: position.kills, stacked: true) }
                 if roomy {
@@ -306,11 +327,28 @@ struct PositionCard: View {
         }
     }
 
+    /// The portrait and name side by side, the level under them, for the narrow side bar.
+    private func columnHeader(type: PositionType, position: Position, level: PositionLevel) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Portrait(name: level.sprite, size: 44)
+                Text(type.name.uppercased()).font(.stencil(15)).foregroundStyle(Theme.text)
+                    .lineLimit(2).minimumScaleFactor(0.7)
+            }
+            HStack(spacing: 4) {
+                Image("badge_level_\(position.level + 1)").resizable().frame(width: 16, height: 16)
+                Text("Level \(position.level + 1): \(level.title)")
+                    .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
+                    .lineLimit(2).minimumScaleFactor(0.8)
+            }
+        }
+    }
+
     /// The three targeting choices as small tiles, for the narrow side bar.
     private func columnPriorityPicker(_ position: Position) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("TARGET").font(.stencil(11)).foregroundStyle(Theme.dim)
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 ForEach(TargetPriority.allCases, id: \.self) { priority in
                     let chosen = position.priority == priority
                     Button {
@@ -318,8 +356,8 @@ struct PositionCard: View {
                     } label: {
                         VStack(spacing: 2) {
                             Image("badge_priority_\(priority.rawValue)").resizable().frame(width: 16, height: 16)
-                            Text(priority.label).font(.system(size: 11, weight: .semibold))
-                                .lineLimit(1).minimumScaleFactor(0.8)
+                            Text(priority.label).font(.system(size: 10, weight: .semibold))
+                                .lineLimit(1).minimumScaleFactor(0.6)
                         }
                         .frame(maxWidth: .infinity, minHeight: 42)
                         .foregroundStyle(chosen ? Theme.background : Theme.text)
@@ -358,7 +396,8 @@ struct PositionCard: View {
     private func actions(_ position: Position) -> some View {
         let next = session.game.nextLevelSpec(of: position)
         let wide = roomy || column
-        let layout = wide ? AnyLayout(HStackLayout(spacing: 8)) : AnyLayout(VStackLayout(spacing: 6))
+        // The side bar is too narrow for two buttons side by side, so they stack at full width.
+        let layout = roomy ? AnyLayout(HStackLayout(spacing: 8)) : AnyLayout(VStackLayout(spacing: column ? 8 : 6))
         layout {
             if let next {
                 Button { session.upgrade(position.id) } label: {
@@ -398,11 +437,11 @@ struct StatRow: View {
     var body: some View {
         if stacked {
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     stat("RNG", String(format: "%.1f", level.range))
                     stat("DPS", String(format: "%.0f", level.damage / level.fireInterval))
                 }
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     stat("NOISE", "\(level.noise)")
                     if let kills { stat("KILLS", "\(kills)") }
                 }
@@ -438,10 +477,12 @@ struct WaveIntel: View {
         }()
         VStack(alignment: .leading, spacing: 6) {
             if let wave = session.level.waves[safe: waveIndex] {
-                HStack {
+                let header = column ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2)) : AnyLayout(HStackLayout())
+                header {
                     Text(session.phase == .wave ? "ON THE ROAD: WAVE \(waveIndex + 1)" : "NEXT: WAVE \(waveIndex + 1)")
                         .font(.stencil(13)).foregroundStyle(Theme.dim)
-                    Spacer()
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    if !column { Spacer() }
                     Text("\(wave.total) hostiles").font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                 }
                 let layout = roomy || column ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
@@ -449,10 +490,11 @@ struct WaveIntel: View {
                     ForEach(wave.counts.map { $0.zombie }, id: \.self) { zombieID in
                         let count = wave.counts.first(where: { $0.zombie == zombieID })?.count ?? 0
                         if let zombie = session.catalog.zombie(zombieID) {
-                            HStack(alignment: .top, spacing: 8) {
-                                Portrait(name: zombie.id, size: roomy ? 52 : 40)
+                            HStack(alignment: column ? .center : .top, spacing: 8) {
+                                Portrait(name: zombie.id, size: roomy ? 52 : column ? 34 : 40)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("\(count) × \(zombie.name.uppercased())").font(.stencil(14)).foregroundStyle(Theme.text)
+                                        .lineLimit(2).minimumScaleFactor(0.8)
                                     if roomy {
                                         Text(zombie.manual).font(.system(size: 12)).foregroundStyle(Theme.dim)
                                             .fixedSize(horizontal: false, vertical: true)
