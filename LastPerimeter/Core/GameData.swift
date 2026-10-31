@@ -34,13 +34,18 @@ public struct PositionType: Codable, Identifiable, Equatable {
     public var role: String
     /// The plain-language field manual entry.
     public var manual: String
+    /// Levels 1 and 2.
     public var levels: [PositionLevel]
+    /// Level 3 comes in two versions, 3A and 3B; the player picks one.
+    public var specializations: [PositionLevel]?
 }
 
 public struct PositionLevel: Codable, Equatable {
     /// The sprite set to draw, from sprites.json.
     public var sprite: String
     public var title: String
+    /// One line on what a level 3 version is good at, for the choice between them.
+    public var about: String?
     /// Supply to build this level (level 1) or to upgrade to it.
     public var cost: Int
     /// Reach in tiles.
@@ -53,6 +58,10 @@ public struct PositionLevel: Codable, Equatable {
     /// Machine guns slow infantry: speed is multiplied by this for slowSeconds.
     public var slowFactor: Double?
     public var slowSeconds: Double?
+    /// Armor this weapon ignores on each hit.
+    public var pierce: Double?
+    /// Each shot also hits every zombie this close (in tiles) to its target.
+    public var splash: Double?
 }
 
 /// A kind of zombie.
@@ -69,6 +78,20 @@ public struct ZombieType: Codable, Identifiable, Equatable {
     public var breachDamage: Int
     /// Drawn this much bigger than life so it reads on a phone screen.
     public var drawScale: Double
+    /// Taken off every hit (less what the weapon pierces).
+    public var armor: Double?
+    /// Positions see it only within this share of their range (Crawlers keep low).
+    public var sightFactor: Double?
+    /// Zombies near it on the road walk faster (the Screamer).
+    public var hurry: Hurry?
+    /// Brutes and the Behemoth: a boss round's headline.
+    public var boss: Bool?
+
+    public struct Hurry: Codable, Equatable {
+        /// How far along the road, either way, in tiles.
+        public var radius: Double
+        public var factor: Double
+    }
 }
 
 /// One level: its map, its path, its waves and its starting numbers.
@@ -138,6 +161,11 @@ public struct LevelSpec: Codable, Equatable {
         }
         if slots.isEmpty { problems.append("\(id): no build slots") }
         if waves.isEmpty { problems.append("\(id): no waves") }
+        for type in catalog.positions {
+            if let options = type.specializations, options.count != 2 {
+                problems.append("\(type.id): level 3 needs two versions to choose from, has \(options.count)")
+            }
+        }
         for (n, wave) in waves.enumerated() {
             for group in wave.groups where catalog.zombie(group.zombie) == nil {
                 problems.append("\(id): wave \(n + 1) uses unknown zombie \(group.zombie)")
@@ -151,6 +179,8 @@ public struct WaveSpec: Codable, Equatable {
     public var groups: [SpawnGroup]
     /// Supply paid for clearing the wave.
     public var bonus: Int
+    /// A round led by a Brute or the Behemoth.
+    public var boss: Bool?
 }
 
 /// A run of one zombie type in a wave: `count` of them, `interval` seconds
@@ -160,4 +190,8 @@ public struct SpawnGroup: Codable, Equatable {
     public var count: Int
     public var interval: Double
     public var delay: Double
+    /// Later rounds' zombies have more health than the type's base...
+    public var healthScale: Double?
+    /// ...and, as they come in bigger numbers, pay less supply each.
+    public var rewardScale: Double?
 }

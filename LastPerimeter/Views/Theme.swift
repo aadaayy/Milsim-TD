@@ -51,12 +51,14 @@ extension View {
 struct PrimaryButtonStyle: ButtonStyle {
     var color = Theme.sand
     var height: CGFloat = 46
+    /// Side padding; smaller for buttons that carry a few words.
+    var inset: CGFloat = 16
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.stencil(17))
             .tracking(1)
             .foregroundStyle(Theme.background)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, inset)
             .frame(minHeight: height)
             .background(color.opacity(configuration.isPressed ? 0.75 : 1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
@@ -65,12 +67,15 @@ struct PrimaryButtonStyle: ButtonStyle {
 /// A darker square button for pause, speed and menus.
 struct IconButtonStyle: ButtonStyle {
     var height: CGFloat = 46
+    /// Lit sand-coloured while its setting is on (paused, or sped up).
+    var lit = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.stencil(16))
-            .foregroundStyle(Theme.text)
+            .foregroundStyle(lit ? Theme.background : Theme.text)
             .frame(minWidth: height, minHeight: height)
-            .background(Theme.panelRaised.opacity(configuration.isPressed ? 0.6 : 1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background((lit ? Theme.sand : Theme.panelRaised).opacity(configuration.isPressed ? 0.6 : 1),
+                        in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Theme.edge.opacity(0.7), lineWidth: 1))
     }
 }

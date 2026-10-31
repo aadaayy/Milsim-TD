@@ -35,7 +35,7 @@ public final class GameState {
     public private(set) var phase: GamePhase = .build
     public private(set) var supply: Int
     public private(set) var commandPostHealth: Int
-    /// Waves started so far (the wave on now is number `wavesStarted`).
+    /// Rounds started so far (the round on now is number `wavesStarted`).
     public private(set) var wavesStarted = 0
     public private(set) var zombies: [Zombie] = []
     public private(set) var positions: [Position] = []
@@ -80,11 +80,23 @@ public final class GameState {
     public func position(id: Int) -> Position? { positions.first { $0.id == id } }
 
     public func levelSpec(of position: Position) -> PositionLevel? {
-        catalog.position(position.type)?.levels[safe: position.level]
+        guard let type = catalog.position(position.type) else { return nil }
+        if position.level < type.levels.count { return type.levels[position.level] }
+        return type.specializations?[safe: position.branch ?? 0]
     }
 
+    /// What the position can become next: one level, or at level 2 the two
+    /// versions of level 3 to choose between (3A first). Empty at the top.
+    public func upgradeOptions(of position: Position) -> [PositionLevel] {
+        guard let type = catalog.position(position.type) else { return [] }
+        if position.level + 1 < type.levels.count { return [type.levels[position.level + 1]] }
+        if position.level + 1 == type.levels.count { return type.specializations ?? [] }
+        return []
+    }
+
+    /// The next level, or the first version of level 3.
     public func nextLevelSpec(of position: Position) -> PositionLevel? {
-        catalog.position(position.type)?.levels[safe: position.level + 1]
+        upgradeOptions(of: position).first
     }
 
     public func canBuild(_ type: String, onSlot slot: Int) -> Bool {
@@ -102,16 +114,19 @@ public final class GameState {
         return [.built(position: position.id)]
     }
 
-    public func canUpgrade(_ id: Int) -> Bool {
-        guard !isOver, let p = position(id: id), let next = nextLevelSpec(of: p) else { return false }
+    /// `branch` picks the version when the next level is a choice (0 for 3A, 1 for 3B).
+    public func canUpgrade(_ id: Int, branch: Int = 0) -> Bool {
+        guard !isOver, let p = position(id: id), let next = upgradeOptions(of: p)[safe: branch] else { return false }
         return supply >= next.cost
     }
 
     @discardableResult
-    public func upgrade(_ id: Int) -> [GameEvent] {
-        guard canUpgrade(id), let index = positions.firstIndex(where: { $0.id == id }),
-              let next = nextLevelSpec(of: positions[index]) else { return [] }
+    public func upgrade(_ id: Int, branch: Int = 0) -> [GameEvent] {
+        guard canUpgrade(id, branch: branch), let index = positions.firstIndex(where: { $0.id == id }) else { return [] }
+        let options = upgradeOptions(of: positions[index])
+        guard let next = options[safe: branch] else { return [] }
         supply -= next.cost
+        if options.count > 1 { positions[index].branch = branch }
         positions[index].level += 1
         positions[index].spent += next.cost
         return [.upgraded(position: id)]
@@ -182,7 +197,7 @@ public final class GameState {
         }
 
         if var current = schedule {
-            for type in current.advance(dt) { spawn(type) }
+            for due in current.advance(dt) { spawn(due) }
             schedule = current
         }
         moveZombies(dt, events: &events)
@@ -214,17 +229,29 @@ public final class GameState {
         return stars
     }
 
-    private func spawn(_ type: String) {
-        guard let spec = catalog.zombie(type) else { return }
-        let zombie = Zombie(id: takeID(), type: type, health: spec.health, maxHealth: spec.health,
+    private func spawn(_ due: WaveSchedule.Spawn) {
+        guard let spec = catalog.zombie(due.zombie) else { return }
+        let health = spec.health * due.healthScale
+        let zombie = Zombie(id: takeID(), type: due.zombie, health: health, maxHealth: health,
                             distance: 0, speed: spec.speed * random.next(in: 0.92...1.08),
-                            lane: random.next(in: -0.22...0.22))
+                            lane: random.next(in: -0.22...0.22),
+                            reward: Int((Double(spec.reward) * due.rewardScale).rounded()))
         zombies.append(zombie)
     }
 
     private func moveZombies(_ dt: Double, events: inout [GameEvent]) {
+        // Screamers hurry the zombies near them along the road (but not each other).
+        let screams: [(distance: Double, hurry: ZombieType.Hurry)] = zombies.compactMap { z in
+            catalog.zombie(z.type)?.hurry.map { (distance: z.distance, hurry: $0) }
+        }
         var breached: [Int] = []
         for i in zombies.indices {
+            var hurry = 1.0
+            if catalog.zombie(zombies[i].type)?.hurry == nil,
+               let near = screams.first(where: { abs($0.distance - zombies[i].distance) <= $0.hurry.radius }) {
+                hurry = near.hurry.factor
+            }
+            zombies[i].hurry = hurry
             zombies[i].distance += zombies[i].currentSpeed * dt
             if zombies[i].slowTime > 0 { zombies[i].slowTime -= dt }
             if zombies[i].distance >= track.length { breached.append(i) }
@@ -241,11 +268,20 @@ public final class GameState {
         }
     }
 
+    /// Damage one hit does: armor takes some off, less what the weapon pierces,
+    /// but a hit always does at least a little.
+    func hitDamage(_ spec: PositionLevel, on zombie: Zombie) -> Double {
+        let armor = max((catalog.zombie(zombie.type)?.armor ?? 0) - (spec.pierce ?? 0), 0)
+        return max(spec.damage - armor, spec.damage * 0.15)
+    }
+
     private func fire(_ dt: Double, events: inout [GameEvent]) {
+        let sight: (String) -> Double = { [catalog] type in catalog.zombie(type)?.sightFactor ?? 1 }
         for p in positions.indices {
             positions[p].cooldown -= dt
             guard let spec = levelSpec(of: positions[p]) else { continue }
-            guard let target = Targeting.pick(for: positions[p], range: spec.range, zombies: zombies, track: track) else {
+            guard let target = Targeting.pick(for: positions[p], range: spec.range, zombies: zombies,
+                                              track: track, sight: sight) else {
                 positions[p].targetID = nil
                 continue
             }
@@ -255,18 +291,26 @@ public final class GameState {
             guard positions[p].cooldown <= 0 else { continue }
             positions[p].cooldown = spec.fireInterval
             events.append(.shot(position: positions[p].id, zombie: target.id, from: positions[p].center, to: at))
-            guard let z = zombies.firstIndex(where: { $0.id == target.id }) else { continue }
-            zombies[z].health -= spec.damage
-            if let factor = spec.slowFactor, let seconds = spec.slowSeconds {
-                zombies[z].slowFactor = factor
-                zombies[z].slowTime = seconds
+            var hit = [target.id]
+            if let splash = spec.splash {
+                hit += zombies.filter { $0.id != target.id && $0.health > 0 &&
+                    track.position(of: $0).distance(to: at) <= splash }.map(\.id)
             }
-            if zombies[z].health <= 0 {
-                let dead = zombies.remove(at: z)
-                positions[p].kills += 1
-                kills += 1
-                supply += catalog.zombie(dead.type)?.reward ?? 0
-                events.append(.killed(zombie: dead.id, type: dead.type, at: at, heading: track.direction(at: dead.distance)))
+            for id in hit {
+                guard let z = zombies.firstIndex(where: { $0.id == id }) else { continue }
+                zombies[z].health -= hitDamage(spec, on: zombies[z])
+                if id == target.id, let factor = spec.slowFactor, let seconds = spec.slowSeconds {
+                    zombies[z].slowFactor = factor
+                    zombies[z].slowTime = seconds
+                }
+                if zombies[z].health <= 0 {
+                    let dead = zombies.remove(at: z)
+                    positions[p].kills += 1
+                    kills += 1
+                    supply += dead.reward
+                    events.append(.killed(zombie: dead.id, type: dead.type, at: track.position(of: dead),
+                                          heading: track.direction(at: dead.distance)))
+                }
             }
         }
     }

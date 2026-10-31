@@ -3,7 +3,7 @@
   "name": "Crossroads",
   "chapter": 1,
   "place": "Outbreak",
-  "briefing": "The outbreak has reached the edge of town. Hold the crossroads: build positions on the cleared pads, then send the first wave when you're ready.",
+  "briefing": "The outbreak has reached the edge of town. Hold the crossroads for 50 rounds: build positions on the cleared pads, then send the first round when you're ready. Every tenth round brings a boss.",
   "cols": 9,
   "rows": 15,
   "tileMeters": 2.4,
@@ -63,88 +63,2424 @@
     13.3
   ],
   "startSupply": 150,
-  "commandPostHealth": 15,
-  "breakSeconds": 12,
+  "commandPostHealth": 20,
+  "breakSeconds": 8,
   "bonusObjective": "Don't let a single zombie reach the Command Post",
   "waves": [
     {
-      "bonus": 30,
+      "bonus": 17,
       "groups": [
         {
           "zombie": "walker",
           "count": 8,
-          "interval": 1.6,
-          "delay": 0
+          "interval": 2.31,
+          "delay": 0.0
         }
       ]
     },
     {
-      "bonus": 40,
+      "bonus": 19,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 10,
+          "interval": 1.9,
+          "delay": 0.0,
+          "healthScale": 1.052,
+          "rewardScale": 0.833
+        }
+      ]
+    },
+    {
+      "bonus": 21,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 6,
+          "interval": 3.25,
+          "delay": 0.0,
+          "healthScale": 1.107,
+          "rewardScale": 0.714
+        },
+        {
+          "zombie": "runner",
+          "count": 6,
+          "interval": 3.25,
+          "delay": 3.0,
+          "healthScale": 1.107,
+          "rewardScale": 0.714
+        }
+      ]
+    },
+    {
+      "bonus": 23,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 7,
+          "interval": 2.86,
+          "delay": 0.0,
+          "healthScale": 1.166,
+          "rewardScale": 0.625
+        },
+        {
+          "zombie": "runner",
+          "count": 6,
+          "interval": 3.33,
+          "delay": 3.0,
+          "healthScale": 1.166,
+          "rewardScale": 0.625
+        }
+      ]
+    },
+    {
+      "bonus": 25,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 9,
+          "interval": 2.28,
+          "delay": 0.0,
+          "healthScale": 1.229,
+          "rewardScale": 0.556
+        },
+        {
+          "zombie": "runner",
+          "count": 5,
+          "interval": 4.1,
+          "delay": 3.0,
+          "healthScale": 1.229,
+          "rewardScale": 0.556
+        }
+      ]
+    },
+    {
+      "bonus": 27,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 7,
+          "interval": 3.0,
+          "delay": 0.0,
+          "healthScale": 1.295,
+          "rewardScale": 0.5
+        },
+        {
+          "zombie": "runner",
+          "count": 4,
+          "interval": 5.25,
+          "delay": 3.0,
+          "healthScale": 1.295,
+          "rewardScale": 0.5
+        },
+        {
+          "zombie": "crawler",
+          "count": 3,
+          "interval": 7.0,
+          "delay": 6.0,
+          "healthScale": 1.295,
+          "rewardScale": 0.5
+        }
+      ]
+    },
+    {
+      "bonus": 29,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 7,
+          "interval": 3.07,
+          "delay": 0.0,
+          "healthScale": 1.365,
+          "rewardScale": 0.455
+        },
+        {
+          "zombie": "runner",
+          "count": 4,
+          "interval": 5.38,
+          "delay": 3.0,
+          "healthScale": 1.365,
+          "rewardScale": 0.455
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 5.38,
+          "delay": 6.0,
+          "healthScale": 1.365,
+          "rewardScale": 0.455
+        }
+      ]
+    },
+    {
+      "bonus": 31,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 9,
+          "interval": 2.44,
+          "delay": 0.0,
+          "healthScale": 1.438,
+          "rewardScale": 0.417
+        },
+        {
+          "zombie": "runner",
+          "count": 6,
+          "interval": 3.67,
+          "delay": 3.0,
+          "healthScale": 1.438,
+          "rewardScale": 0.417
+        },
+        {
+          "zombie": "crawler",
+          "count": 3,
+          "interval": 7.33,
+          "delay": 6.0,
+          "healthScale": 1.438,
+          "rewardScale": 0.417
+        }
+      ]
+    },
+    {
+      "bonus": 33,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 10,
+          "interval": 2.25,
+          "delay": 0.0,
+          "healthScale": 1.515,
+          "rewardScale": 0.385
+        },
+        {
+          "zombie": "runner",
+          "count": 6,
+          "interval": 3.75,
+          "delay": 3.0,
+          "healthScale": 1.515,
+          "rewardScale": 0.385
+        },
+        {
+          "zombie": "crawler",
+          "count": 3,
+          "interval": 7.5,
+          "delay": 6.0,
+          "healthScale": 1.515,
+          "rewardScale": 0.385
+        }
+      ]
+    },
+    {
+      "bonus": 35,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 11,
+          "interval": 2.09,
+          "delay": 0.0,
+          "healthScale": 1.596,
+          "rewardScale": 0.357
+        },
+        {
+          "zombie": "runner",
+          "count": 7,
+          "interval": 3.29,
+          "delay": 3.0,
+          "healthScale": 1.596,
+          "rewardScale": 0.357
+        },
+        {
+          "zombie": "crawler",
+          "count": 3,
+          "interval": 7.67,
+          "delay": 6.0,
+          "healthScale": 1.596,
+          "rewardScale": 0.357
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 5,
+          "delay": 11.5,
+          "healthScale": 1.263,
+          "rewardScale": 0.357
+        }
+      ],
+      "boss": true
+    },
+    {
+      "bonus": 37,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 12,
+          "interval": 1.96,
+          "delay": 0.0,
+          "healthScale": 1.68,
+          "rewardScale": 0.333
+        },
+        {
+          "zombie": "runner",
+          "count": 7,
+          "interval": 3.36,
+          "delay": 3.0,
+          "healthScale": 1.68,
+          "rewardScale": 0.333
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 5.88,
+          "delay": 6.0,
+          "healthScale": 1.68,
+          "rewardScale": 0.333
+        }
+      ]
+    },
+    {
+      "bonus": 39,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 11,
+          "interval": 2.18,
+          "delay": 0.0,
+          "healthScale": 1.768,
+          "rewardScale": 0.312
+        },
+        {
+          "zombie": "runner",
+          "count": 6,
+          "interval": 4.0,
+          "delay": 3.0,
+          "healthScale": 1.768,
+          "rewardScale": 0.312
+        },
+        {
+          "zombie": "crawler",
+          "count": 3,
+          "interval": 8.0,
+          "delay": 6.0,
+          "healthScale": 1.768,
+          "rewardScale": 0.312
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 12.0,
+          "delay": 9.0,
+          "healthScale": 1.768,
+          "rewardScale": 0.312
+        }
+      ]
+    },
+    {
+      "bonus": 41,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 11,
+          "interval": 2.23,
+          "delay": 0.0,
+          "healthScale": 1.859,
+          "rewardScale": 0.294
+        },
+        {
+          "zombie": "runner",
+          "count": 7,
+          "interval": 3.5,
+          "delay": 3.0,
+          "healthScale": 1.859,
+          "rewardScale": 0.294
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 6.12,
+          "delay": 6.0,
+          "healthScale": 1.859,
+          "rewardScale": 0.294
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 12.25,
+          "delay": 9.0,
+          "healthScale": 1.859,
+          "rewardScale": 0.294
+        }
+      ]
+    },
+    {
+      "bonus": 43,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 13,
+          "interval": 1.92,
+          "delay": 0.0,
+          "healthScale": 1.954,
+          "rewardScale": 0.278
+        },
+        {
+          "zombie": "runner",
+          "count": 8,
+          "interval": 3.12,
+          "delay": 3.0,
+          "healthScale": 1.954,
+          "rewardScale": 0.278
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 6.25,
+          "delay": 6.0,
+          "healthScale": 1.954,
+          "rewardScale": 0.278
+        },
+        {
+          "zombie": "screamer",
+          "count": 1,
+          "interval": 25.0,
+          "delay": 9.0,
+          "healthScale": 1.954,
+          "rewardScale": 0.278
+        }
+      ]
+    },
+    {
+      "bonus": 45,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 14,
+          "interval": 1.82,
+          "delay": 0.0,
+          "healthScale": 2.053,
+          "rewardScale": 0.263
+        },
+        {
+          "zombie": "runner",
+          "count": 8,
+          "interval": 3.19,
+          "delay": 3.0,
+          "healthScale": 2.053,
+          "rewardScale": 0.263
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 6.38,
+          "delay": 6.0,
+          "healthScale": 2.053,
+          "rewardScale": 0.263
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 12.75,
+          "delay": 9.0,
+          "healthScale": 2.053,
+          "rewardScale": 0.263
+        }
+      ]
+    },
+    {
+      "bonus": 47,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 12,
+          "interval": 2.17,
+          "delay": 0.0,
+          "healthScale": 2.155,
+          "rewardScale": 0.25
+        },
+        {
+          "zombie": "runner",
+          "count": 7,
+          "interval": 3.71,
+          "delay": 3.0,
+          "healthScale": 2.155,
+          "rewardScale": 0.25
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 6.5,
+          "delay": 6.0,
+          "healthScale": 2.155,
+          "rewardScale": 0.25
+        },
+        {
+          "zombie": "screamer",
+          "count": 1,
+          "interval": 26.0,
+          "delay": 9.0,
+          "healthScale": 2.155,
+          "rewardScale": 0.25
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 13.0,
+          "delay": 12.0,
+          "healthScale": 2.155,
+          "rewardScale": 0.25
+        }
+      ]
+    },
+    {
+      "bonus": 49,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 12,
+          "interval": 2.21,
+          "delay": 0.0,
+          "healthScale": 2.261,
+          "rewardScale": 0.238
+        },
+        {
+          "zombie": "runner",
+          "count": 7,
+          "interval": 3.79,
+          "delay": 3.0,
+          "healthScale": 2.261,
+          "rewardScale": 0.238
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 6.62,
+          "delay": 6.0,
+          "healthScale": 2.261,
+          "rewardScale": 0.238
+        },
+        {
+          "zombie": "screamer",
+          "count": 1,
+          "interval": 26.5,
+          "delay": 9.0,
+          "healthScale": 2.261,
+          "rewardScale": 0.238
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 13.25,
+          "delay": 12.0,
+          "healthScale": 2.261,
+          "rewardScale": 0.238
+        }
+      ]
+    },
+    {
+      "bonus": 51,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 14,
+          "interval": 1.93,
+          "delay": 0.0,
+          "healthScale": 2.37,
+          "rewardScale": 0.227
+        },
+        {
+          "zombie": "runner",
+          "count": 8,
+          "interval": 3.38,
+          "delay": 3.0,
+          "healthScale": 2.37,
+          "rewardScale": 0.227
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 6.75,
+          "delay": 6.0,
+          "healthScale": 2.37,
+          "rewardScale": 0.227
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 13.5,
+          "delay": 9.0,
+          "healthScale": 2.37,
+          "rewardScale": 0.227
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 13.5,
+          "delay": 12.0,
+          "healthScale": 2.37,
+          "rewardScale": 0.227
+        }
+      ]
+    },
+    {
+      "bonus": 53,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 15,
+          "interval": 1.83,
+          "delay": 0.0,
+          "healthScale": 2.483,
+          "rewardScale": 0.217
+        },
+        {
+          "zombie": "runner",
+          "count": 9,
+          "interval": 3.06,
+          "delay": 3.0,
+          "healthScale": 2.483,
+          "rewardScale": 0.217
+        },
+        {
+          "zombie": "crawler",
+          "count": 5,
+          "interval": 5.5,
+          "delay": 6.0,
+          "healthScale": 2.483,
+          "rewardScale": 0.217
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 13.75,
+          "delay": 9.0,
+          "healthScale": 2.483,
+          "rewardScale": 0.217
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 13.75,
+          "delay": 12.0,
+          "healthScale": 2.483,
+          "rewardScale": 0.217
+        }
+      ]
+    },
+    {
+      "bonus": 55,
       "groups": [
         {
           "zombie": "walker",
           "count": 16,
-          "interval": 1.0,
-          "delay": 0
+          "interval": 1.75,
+          "delay": 0.0,
+          "healthScale": 2.6,
+          "rewardScale": 0.208
+        },
+        {
+          "zombie": "runner",
+          "count": 9,
+          "interval": 3.11,
+          "delay": 3.0,
+          "healthScale": 2.6,
+          "rewardScale": 0.208
+        },
+        {
+          "zombie": "crawler",
+          "count": 5,
+          "interval": 5.6,
+          "delay": 6.0,
+          "healthScale": 2.6,
+          "rewardScale": 0.208
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 14.0,
+          "delay": 9.0,
+          "healthScale": 2.6,
+          "rewardScale": 0.208
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 14.0,
+          "delay": 12.0,
+          "healthScale": 2.6,
+          "rewardScale": 0.208
+        },
+        {
+          "zombie": "brute",
+          "count": 2,
+          "interval": 5,
+          "delay": 14.0,
+          "healthScale": 1.612,
+          "rewardScale": 0.208
         }
-      ]
+      ],
+      "boss": true
     },
     {
-      "bonus": 50,
+      "bonus": 57,
       "groups": [
         {
           "zombie": "walker",
-          "count": 14,
-          "interval": 1.0,
-          "delay": 0
+          "count": 13,
+          "interval": 2.19,
+          "delay": 0.0,
+          "healthScale": 2.72,
+          "rewardScale": 0.2
         },
         {
           "zombie": "runner",
           "count": 8,
-          "interval": 1.3,
-          "delay": 5
+          "interval": 3.56,
+          "delay": 3.0,
+          "healthScale": 2.72,
+          "rewardScale": 0.2
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 7.12,
+          "delay": 6.0,
+          "healthScale": 2.72,
+          "rewardScale": 0.2
+        },
+        {
+          "zombie": "screamer",
+          "count": 1,
+          "interval": 28.5,
+          "delay": 9.0,
+          "healthScale": 2.72,
+          "rewardScale": 0.2
+        },
+        {
+          "zombie": "bloater",
+          "count": 1,
+          "interval": 28.5,
+          "delay": 12.0,
+          "healthScale": 2.72,
+          "rewardScale": 0.2
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 9.5,
+          "delay": 15.0,
+          "healthScale": 2.72,
+          "rewardScale": 0.2
         }
       ]
     },
     {
-      "bonus": 60,
+      "bonus": 59,
       "groups": [
         {
           "zombie": "walker",
-          "count": 24,
-          "interval": 0.7,
-          "delay": 0
+          "count": 13,
+          "interval": 2.23,
+          "delay": 0.0,
+          "healthScale": 2.844,
+          "rewardScale": 0.192
         },
         {
           "zombie": "runner",
-          "count": 12,
-          "interval": 1.0,
-          "delay": 4
+          "count": 8,
+          "interval": 3.62,
+          "delay": 3.0,
+          "healthScale": 2.844,
+          "rewardScale": 0.192
+        },
+        {
+          "zombie": "crawler",
+          "count": 4,
+          "interval": 7.25,
+          "delay": 6.0,
+          "healthScale": 2.844,
+          "rewardScale": 0.192
+        },
+        {
+          "zombie": "screamer",
+          "count": 1,
+          "interval": 29.0,
+          "delay": 9.0,
+          "healthScale": 2.844,
+          "rewardScale": 0.192
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 14.5,
+          "delay": 12.0,
+          "healthScale": 2.844,
+          "rewardScale": 0.192
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 9.67,
+          "delay": 15.0,
+          "healthScale": 2.844,
+          "rewardScale": 0.192
         }
       ]
     },
     {
-      "bonus": 80,
+      "bonus": 61,
       "groups": [
         {
           "zombie": "walker",
-          "count": 34,
-          "interval": 0.5,
-          "delay": 0
+          "count": 15,
+          "interval": 1.97,
+          "delay": 0.0,
+          "healthScale": 2.971,
+          "rewardScale": 0.185
         },
         {
           "zombie": "runner",
-          "count": 14,
-          "interval": 0.9,
-          "delay": 3
+          "count": 9,
+          "interval": 3.28,
+          "delay": 3.0,
+          "healthScale": 2.971,
+          "rewardScale": 0.185
+        },
+        {
+          "zombie": "crawler",
+          "count": 5,
+          "interval": 5.9,
+          "delay": 6.0,
+          "healthScale": 2.971,
+          "rewardScale": 0.185
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 14.75,
+          "delay": 9.0,
+          "healthScale": 2.971,
+          "rewardScale": 0.185
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 14.75,
+          "delay": 12.0,
+          "healthScale": 2.971,
+          "rewardScale": 0.185
+        },
+        {
+          "zombie": "armored",
+          "count": 2,
+          "interval": 14.75,
+          "delay": 15.0,
+          "healthScale": 2.971,
+          "rewardScale": 0.185
+        }
+      ]
+    },
+    {
+      "bonus": 63,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 16,
+          "interval": 1.88,
+          "delay": 0.0,
+          "healthScale": 3.102,
+          "rewardScale": 0.179
+        },
+        {
+          "zombie": "runner",
+          "count": 9,
+          "interval": 3.33,
+          "delay": 3.0,
+          "healthScale": 3.102,
+          "rewardScale": 0.179
+        },
+        {
+          "zombie": "crawler",
+          "count": 5,
+          "interval": 6.0,
+          "delay": 6.0,
+          "healthScale": 3.102,
+          "rewardScale": 0.179
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 15.0,
+          "delay": 9.0,
+          "healthScale": 3.102,
+          "rewardScale": 0.179
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 15.0,
+          "delay": 12.0,
+          "healthScale": 3.102,
+          "rewardScale": 0.179
+        },
+        {
+          "zombie": "armored",
+          "count": 2,
+          "interval": 15.0,
+          "delay": 15.0,
+          "healthScale": 3.102,
+          "rewardScale": 0.179
+        }
+      ]
+    },
+    {
+      "bonus": 65,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 16,
+          "interval": 1.91,
+          "delay": 0.0,
+          "healthScale": 3.237,
+          "rewardScale": 0.172
         },
         {
           "zombie": "runner",
           "count": 10,
-          "interval": 0.4,
-          "delay": 18
+          "interval": 3.05,
+          "delay": 3.0,
+          "healthScale": 3.237,
+          "rewardScale": 0.172
+        },
+        {
+          "zombie": "crawler",
+          "count": 5,
+          "interval": 6.1,
+          "delay": 6.0,
+          "healthScale": 3.237,
+          "rewardScale": 0.172
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 15.25,
+          "delay": 9.0,
+          "healthScale": 3.237,
+          "rewardScale": 0.172
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 15.25,
+          "delay": 12.0,
+          "healthScale": 3.237,
+          "rewardScale": 0.172
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 10.17,
+          "delay": 15.0,
+          "healthScale": 3.237,
+          "rewardScale": 0.172
+        },
+        {
+          "zombie": "behemoth",
+          "count": 1,
+          "interval": 5,
+          "delay": 15.2,
+          "healthScale": 1.799,
+          "rewardScale": 0.172
+        }
+      ],
+      "boss": true
+    },
+    {
+      "bonus": 67,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 17,
+          "interval": 1.82,
+          "delay": 0.0,
+          "healthScale": 3.375,
+          "rewardScale": 0.167
+        },
+        {
+          "zombie": "runner",
+          "count": 10,
+          "interval": 3.1,
+          "delay": 3.0,
+          "healthScale": 3.375,
+          "rewardScale": 0.167
+        },
+        {
+          "zombie": "crawler",
+          "count": 5,
+          "interval": 6.2,
+          "delay": 6.0,
+          "healthScale": 3.375,
+          "rewardScale": 0.167
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 15.5,
+          "delay": 9.0,
+          "healthScale": 3.375,
+          "rewardScale": 0.167
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 15.5,
+          "delay": 12.0,
+          "healthScale": 3.375,
+          "rewardScale": 0.167
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 10.33,
+          "delay": 15.0,
+          "healthScale": 3.375,
+          "rewardScale": 0.167
         }
       ]
+    },
+    {
+      "bonus": 69,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 18,
+          "interval": 1.75,
+          "delay": 0.0,
+          "healthScale": 3.517,
+          "rewardScale": 0.161
+        },
+        {
+          "zombie": "runner",
+          "count": 11,
+          "interval": 2.86,
+          "delay": 3.0,
+          "healthScale": 3.517,
+          "rewardScale": 0.161
+        },
+        {
+          "zombie": "crawler",
+          "count": 6,
+          "interval": 5.25,
+          "delay": 6.0,
+          "healthScale": 3.517,
+          "rewardScale": 0.161
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 15.75,
+          "delay": 9.0,
+          "healthScale": 3.517,
+          "rewardScale": 0.161
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 15.75,
+          "delay": 12.0,
+          "healthScale": 3.517,
+          "rewardScale": 0.161
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 10.5,
+          "delay": 15.0,
+          "healthScale": 3.517,
+          "rewardScale": 0.161
+        }
+      ]
+    },
+    {
+      "bonus": 71,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 18,
+          "interval": 1.78,
+          "delay": 0.0,
+          "healthScale": 3.662,
+          "rewardScale": 0.156
+        },
+        {
+          "zombie": "runner",
+          "count": 11,
+          "interval": 2.91,
+          "delay": 3.0,
+          "healthScale": 3.662,
+          "rewardScale": 0.156
+        },
+        {
+          "zombie": "crawler",
+          "count": 6,
+          "interval": 5.33,
+          "delay": 6.0,
+          "healthScale": 3.662,
+          "rewardScale": 0.156
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 16.0,
+          "delay": 9.0,
+          "healthScale": 3.662,
+          "rewardScale": 0.156
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 16.0,
+          "delay": 12.0,
+          "healthScale": 3.662,
+          "rewardScale": 0.156
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 10.67,
+          "delay": 15.0,
+          "healthScale": 3.662,
+          "rewardScale": 0.156
+        }
+      ]
+    },
+    {
+      "bonus": 73,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 19,
+          "interval": 1.71,
+          "delay": 0.0,
+          "healthScale": 3.811,
+          "rewardScale": 0.152
+        },
+        {
+          "zombie": "runner",
+          "count": 11,
+          "interval": 2.95,
+          "delay": 3.0,
+          "healthScale": 3.811,
+          "rewardScale": 0.152
+        },
+        {
+          "zombie": "crawler",
+          "count": 6,
+          "interval": 5.42,
+          "delay": 6.0,
+          "healthScale": 3.811,
+          "rewardScale": 0.152
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 16.25,
+          "delay": 9.0,
+          "healthScale": 3.811,
+          "rewardScale": 0.152
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 16.25,
+          "delay": 12.0,
+          "healthScale": 3.811,
+          "rewardScale": 0.152
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 10.83,
+          "delay": 15.0,
+          "healthScale": 3.811,
+          "rewardScale": 0.152
+        }
+      ]
+    },
+    {
+      "bonus": 75,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 20,
+          "interval": 1.65,
+          "delay": 0.0,
+          "healthScale": 3.964,
+          "rewardScale": 0.147
+        },
+        {
+          "zombie": "runner",
+          "count": 12,
+          "interval": 2.75,
+          "delay": 3.0,
+          "healthScale": 3.964,
+          "rewardScale": 0.147
+        },
+        {
+          "zombie": "crawler",
+          "count": 6,
+          "interval": 5.5,
+          "delay": 6.0,
+          "healthScale": 3.964,
+          "rewardScale": 0.147
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 16.5,
+          "delay": 9.0,
+          "healthScale": 3.964,
+          "rewardScale": 0.147
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 16.5,
+          "delay": 12.0,
+          "healthScale": 3.964,
+          "rewardScale": 0.147
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 11.0,
+          "delay": 15.0,
+          "healthScale": 3.964,
+          "rewardScale": 0.147
+        },
+        {
+          "zombie": "brute",
+          "count": 3,
+          "interval": 5,
+          "delay": 16.5,
+          "healthScale": 1.991,
+          "rewardScale": 0.147
+        }
+      ],
+      "boss": true
+    },
+    {
+      "bonus": 77,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 20,
+          "interval": 1.68,
+          "delay": 0.0,
+          "healthScale": 4.12,
+          "rewardScale": 0.143
+        },
+        {
+          "zombie": "runner",
+          "count": 12,
+          "interval": 2.79,
+          "delay": 3.0,
+          "healthScale": 4.12,
+          "rewardScale": 0.143
+        },
+        {
+          "zombie": "crawler",
+          "count": 6,
+          "interval": 5.58,
+          "delay": 6.0,
+          "healthScale": 4.12,
+          "rewardScale": 0.143
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 16.75,
+          "delay": 9.0,
+          "healthScale": 4.12,
+          "rewardScale": 0.143
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 16.75,
+          "delay": 12.0,
+          "healthScale": 4.12,
+          "rewardScale": 0.143
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 11.17,
+          "delay": 15.0,
+          "healthScale": 4.12,
+          "rewardScale": 0.143
+        }
+      ]
+    },
+    {
+      "bonus": 79,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 21,
+          "interval": 1.62,
+          "delay": 0.0,
+          "healthScale": 4.28,
+          "rewardScale": 0.139
+        },
+        {
+          "zombie": "runner",
+          "count": 13,
+          "interval": 2.62,
+          "delay": 3.0,
+          "healthScale": 4.28,
+          "rewardScale": 0.139
+        },
+        {
+          "zombie": "crawler",
+          "count": 7,
+          "interval": 4.86,
+          "delay": 6.0,
+          "healthScale": 4.28,
+          "rewardScale": 0.139
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 17.0,
+          "delay": 9.0,
+          "healthScale": 4.28,
+          "rewardScale": 0.139
+        },
+        {
+          "zombie": "bloater",
+          "count": 2,
+          "interval": 17.0,
+          "delay": 12.0,
+          "healthScale": 4.28,
+          "rewardScale": 0.139
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 11.33,
+          "delay": 15.0,
+          "healthScale": 4.28,
+          "rewardScale": 0.139
+        }
+      ]
+    },
+    {
+      "bonus": 81,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 22,
+          "interval": 1.57,
+          "delay": 0.0,
+          "healthScale": 4.443,
+          "rewardScale": 0.135
+        },
+        {
+          "zombie": "runner",
+          "count": 13,
+          "interval": 2.65,
+          "delay": 3.0,
+          "healthScale": 4.443,
+          "rewardScale": 0.135
+        },
+        {
+          "zombie": "crawler",
+          "count": 7,
+          "interval": 4.93,
+          "delay": 6.0,
+          "healthScale": 4.443,
+          "rewardScale": 0.135
+        },
+        {
+          "zombie": "screamer",
+          "count": 2,
+          "interval": 17.25,
+          "delay": 9.0,
+          "healthScale": 4.443,
+          "rewardScale": 0.135
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 11.5,
+          "delay": 12.0,
+          "healthScale": 4.443,
+          "rewardScale": 0.135
+        },
+        {
+          "zombie": "armored",
+          "count": 3,
+          "interval": 11.5,
+          "delay": 15.0,
+          "healthScale": 4.443,
+          "rewardScale": 0.135
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.108,
+          "rewardScale": 0.135
+        }
+      ]
+    },
+    {
+      "bonus": 83,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 22,
+          "interval": 1.59,
+          "delay": 0.0,
+          "healthScale": 4.61,
+          "rewardScale": 0.132
+        },
+        {
+          "zombie": "runner",
+          "count": 13,
+          "interval": 2.69,
+          "delay": 3.0,
+          "healthScale": 4.61,
+          "rewardScale": 0.132
+        },
+        {
+          "zombie": "crawler",
+          "count": 7,
+          "interval": 5.0,
+          "delay": 6.0,
+          "healthScale": 4.61,
+          "rewardScale": 0.132
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 11.67,
+          "delay": 9.0,
+          "healthScale": 4.61,
+          "rewardScale": 0.132
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 11.67,
+          "delay": 12.0,
+          "healthScale": 4.61,
+          "rewardScale": 0.132
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 8.75,
+          "delay": 15.0,
+          "healthScale": 4.61,
+          "rewardScale": 0.132
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.147,
+          "rewardScale": 0.132
+        }
+      ]
+    },
+    {
+      "bonus": 85,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 23,
+          "interval": 1.54,
+          "delay": 0.0,
+          "healthScale": 4.781,
+          "rewardScale": 0.128
+        },
+        {
+          "zombie": "runner",
+          "count": 14,
+          "interval": 2.54,
+          "delay": 3.0,
+          "healthScale": 4.781,
+          "rewardScale": 0.128
+        },
+        {
+          "zombie": "crawler",
+          "count": 7,
+          "interval": 5.07,
+          "delay": 6.0,
+          "healthScale": 4.781,
+          "rewardScale": 0.128
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 11.83,
+          "delay": 9.0,
+          "healthScale": 4.781,
+          "rewardScale": 0.128
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 11.83,
+          "delay": 12.0,
+          "healthScale": 4.781,
+          "rewardScale": 0.128
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 8.88,
+          "delay": 15.0,
+          "healthScale": 4.781,
+          "rewardScale": 0.128
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.187,
+          "rewardScale": 0.128
+        }
+      ]
+    },
+    {
+      "bonus": 87,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 24,
+          "interval": 1.5,
+          "delay": 0.0,
+          "healthScale": 4.955,
+          "rewardScale": 0.125
+        },
+        {
+          "zombie": "runner",
+          "count": 14,
+          "interval": 2.57,
+          "delay": 3.0,
+          "healthScale": 4.955,
+          "rewardScale": 0.125
+        },
+        {
+          "zombie": "crawler",
+          "count": 7,
+          "interval": 5.14,
+          "delay": 6.0,
+          "healthScale": 4.955,
+          "rewardScale": 0.125
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 12.0,
+          "delay": 9.0,
+          "healthScale": 4.955,
+          "rewardScale": 0.125
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 12.0,
+          "delay": 12.0,
+          "healthScale": 4.955,
+          "rewardScale": 0.125
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.0,
+          "delay": 15.0,
+          "healthScale": 4.955,
+          "rewardScale": 0.125
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.226,
+          "rewardScale": 0.125
+        }
+      ]
+    },
+    {
+      "bonus": 89,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 25,
+          "interval": 1.46,
+          "delay": 0.0,
+          "healthScale": 5.133,
+          "rewardScale": 0.122
+        },
+        {
+          "zombie": "runner",
+          "count": 15,
+          "interval": 2.43,
+          "delay": 3.0,
+          "healthScale": 5.133,
+          "rewardScale": 0.122
+        },
+        {
+          "zombie": "crawler",
+          "count": 8,
+          "interval": 4.56,
+          "delay": 6.0,
+          "healthScale": 5.133,
+          "rewardScale": 0.122
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 12.17,
+          "delay": 9.0,
+          "healthScale": 5.133,
+          "rewardScale": 0.122
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 12.17,
+          "delay": 12.0,
+          "healthScale": 5.133,
+          "rewardScale": 0.122
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.12,
+          "delay": 15.0,
+          "healthScale": 5.133,
+          "rewardScale": 0.122
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.266,
+          "rewardScale": 0.122
+        }
+      ]
+    },
+    {
+      "bonus": 91,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 25,
+          "interval": 1.48,
+          "delay": 0.0,
+          "healthScale": 5.314,
+          "rewardScale": 0.119
+        },
+        {
+          "zombie": "runner",
+          "count": 15,
+          "interval": 2.47,
+          "delay": 3.0,
+          "healthScale": 5.314,
+          "rewardScale": 0.119
+        },
+        {
+          "zombie": "crawler",
+          "count": 8,
+          "interval": 4.62,
+          "delay": 6.0,
+          "healthScale": 5.314,
+          "rewardScale": 0.119
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 12.33,
+          "delay": 9.0,
+          "healthScale": 5.314,
+          "rewardScale": 0.119
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 12.33,
+          "delay": 12.0,
+          "healthScale": 5.314,
+          "rewardScale": 0.119
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.25,
+          "delay": 15.0,
+          "healthScale": 5.314,
+          "rewardScale": 0.119
+        },
+        {
+          "zombie": "brute",
+          "count": 1,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.305,
+          "rewardScale": 0.119
+        }
+      ]
+    },
+    {
+      "bonus": 93,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 26,
+          "interval": 1.44,
+          "delay": 0.0,
+          "healthScale": 5.499,
+          "rewardScale": 0.116
+        },
+        {
+          "zombie": "runner",
+          "count": 16,
+          "interval": 2.34,
+          "delay": 3.0,
+          "healthScale": 5.499,
+          "rewardScale": 0.116
+        },
+        {
+          "zombie": "crawler",
+          "count": 8,
+          "interval": 4.69,
+          "delay": 6.0,
+          "healthScale": 5.499,
+          "rewardScale": 0.116
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 12.5,
+          "delay": 9.0,
+          "healthScale": 5.499,
+          "rewardScale": 0.116
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 12.5,
+          "delay": 12.0,
+          "healthScale": 5.499,
+          "rewardScale": 0.116
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.38,
+          "delay": 15.0,
+          "healthScale": 5.499,
+          "rewardScale": 0.116
+        },
+        {
+          "zombie": "brute",
+          "count": 2,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.345,
+          "rewardScale": 0.116
+        }
+      ]
+    },
+    {
+      "bonus": 95,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 27,
+          "interval": 1.41,
+          "delay": 0.0,
+          "healthScale": 5.688,
+          "rewardScale": 0.114
+        },
+        {
+          "zombie": "runner",
+          "count": 16,
+          "interval": 2.38,
+          "delay": 3.0,
+          "healthScale": 5.688,
+          "rewardScale": 0.114
+        },
+        {
+          "zombie": "crawler",
+          "count": 8,
+          "interval": 4.75,
+          "delay": 6.0,
+          "healthScale": 5.688,
+          "rewardScale": 0.114
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 12.67,
+          "delay": 9.0,
+          "healthScale": 5.688,
+          "rewardScale": 0.114
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 12.67,
+          "delay": 12.0,
+          "healthScale": 5.688,
+          "rewardScale": 0.114
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.5,
+          "delay": 15.0,
+          "healthScale": 5.688,
+          "rewardScale": 0.114
+        },
+        {
+          "zombie": "brute",
+          "count": 4,
+          "interval": 5,
+          "delay": 19.0,
+          "healthScale": 2.385,
+          "rewardScale": 0.114
+        }
+      ],
+      "boss": true
+    },
+    {
+      "bonus": 97,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 28,
+          "interval": 1.38,
+          "delay": 0.0,
+          "healthScale": 5.88,
+          "rewardScale": 0.111
+        },
+        {
+          "zombie": "runner",
+          "count": 16,
+          "interval": 2.41,
+          "delay": 3.0,
+          "healthScale": 5.88,
+          "rewardScale": 0.111
+        },
+        {
+          "zombie": "crawler",
+          "count": 9,
+          "interval": 4.28,
+          "delay": 6.0,
+          "healthScale": 5.88,
+          "rewardScale": 0.111
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 12.83,
+          "delay": 9.0,
+          "healthScale": 5.88,
+          "rewardScale": 0.111
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 12.83,
+          "delay": 12.0,
+          "healthScale": 5.88,
+          "rewardScale": 0.111
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.62,
+          "delay": 15.0,
+          "healthScale": 5.88,
+          "rewardScale": 0.111
+        },
+        {
+          "zombie": "brute",
+          "count": 2,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.425,
+          "rewardScale": 0.111
+        }
+      ]
+    },
+    {
+      "bonus": 99,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 28,
+          "interval": 1.39,
+          "delay": 0.0,
+          "healthScale": 6.076,
+          "rewardScale": 0.109
+        },
+        {
+          "zombie": "runner",
+          "count": 17,
+          "interval": 2.29,
+          "delay": 3.0,
+          "healthScale": 6.076,
+          "rewardScale": 0.109
+        },
+        {
+          "zombie": "crawler",
+          "count": 9,
+          "interval": 4.33,
+          "delay": 6.0,
+          "healthScale": 6.076,
+          "rewardScale": 0.109
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 13.0,
+          "delay": 9.0,
+          "healthScale": 6.076,
+          "rewardScale": 0.109
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 13.0,
+          "delay": 12.0,
+          "healthScale": 6.076,
+          "rewardScale": 0.109
+        },
+        {
+          "zombie": "armored",
+          "count": 4,
+          "interval": 9.75,
+          "delay": 15.0,
+          "healthScale": 6.076,
+          "rewardScale": 0.109
+        },
+        {
+          "zombie": "brute",
+          "count": 2,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.465,
+          "rewardScale": 0.109
+        }
+      ]
+    },
+    {
+      "bonus": 101,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 29,
+          "interval": 1.36,
+          "delay": 0.0,
+          "healthScale": 6.275,
+          "rewardScale": 0.106
+        },
+        {
+          "zombie": "runner",
+          "count": 17,
+          "interval": 2.32,
+          "delay": 3.0,
+          "healthScale": 6.275,
+          "rewardScale": 0.106
+        },
+        {
+          "zombie": "crawler",
+          "count": 9,
+          "interval": 4.39,
+          "delay": 6.0,
+          "healthScale": 6.275,
+          "rewardScale": 0.106
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 13.17,
+          "delay": 9.0,
+          "healthScale": 6.275,
+          "rewardScale": 0.106
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 13.17,
+          "delay": 12.0,
+          "healthScale": 6.275,
+          "rewardScale": 0.106
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 7.9,
+          "delay": 15.0,
+          "healthScale": 6.275,
+          "rewardScale": 0.106
+        },
+        {
+          "zombie": "brute",
+          "count": 2,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.505,
+          "rewardScale": 0.106
+        }
+      ]
+    },
+    {
+      "bonus": 103,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 30,
+          "interval": 1.33,
+          "delay": 0.0,
+          "healthScale": 6.478,
+          "rewardScale": 0.104
+        },
+        {
+          "zombie": "runner",
+          "count": 18,
+          "interval": 2.22,
+          "delay": 3.0,
+          "healthScale": 6.478,
+          "rewardScale": 0.104
+        },
+        {
+          "zombie": "crawler",
+          "count": 9,
+          "interval": 4.44,
+          "delay": 6.0,
+          "healthScale": 6.478,
+          "rewardScale": 0.104
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 13.33,
+          "delay": 9.0,
+          "healthScale": 6.478,
+          "rewardScale": 0.104
+        },
+        {
+          "zombie": "bloater",
+          "count": 3,
+          "interval": 13.33,
+          "delay": 12.0,
+          "healthScale": 6.478,
+          "rewardScale": 0.104
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 6.478,
+          "rewardScale": 0.104
+        },
+        {
+          "zombie": "brute",
+          "count": 2,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.545,
+          "rewardScale": 0.104
+        }
+      ]
+    },
+    {
+      "bonus": 105,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 31,
+          "interval": 1.29,
+          "delay": 0.0,
+          "healthScale": 6.685,
+          "rewardScale": 0.102
+        },
+        {
+          "zombie": "runner",
+          "count": 18,
+          "interval": 2.22,
+          "delay": 3.0,
+          "healthScale": 6.685,
+          "rewardScale": 0.102
+        },
+        {
+          "zombie": "crawler",
+          "count": 10,
+          "interval": 4.0,
+          "delay": 6.0,
+          "healthScale": 6.685,
+          "rewardScale": 0.102
+        },
+        {
+          "zombie": "screamer",
+          "count": 3,
+          "interval": 13.33,
+          "delay": 9.0,
+          "healthScale": 6.685,
+          "rewardScale": 0.102
+        },
+        {
+          "zombie": "bloater",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 12.0,
+          "healthScale": 6.685,
+          "rewardScale": 0.102
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 6.685,
+          "rewardScale": 0.102
+        },
+        {
+          "zombie": "brute",
+          "count": 3,
+          "interval": 5,
+          "delay": 20.0,
+          "healthScale": 2.586,
+          "rewardScale": 0.102
+        }
+      ],
+      "boss": true
+    },
+    {
+      "bonus": 107,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 31,
+          "interval": 1.29,
+          "delay": 0.0,
+          "healthScale": 6.895,
+          "rewardScale": 0.1
+        },
+        {
+          "zombie": "runner",
+          "count": 19,
+          "interval": 2.11,
+          "delay": 3.0,
+          "healthScale": 6.895,
+          "rewardScale": 0.1
+        },
+        {
+          "zombie": "crawler",
+          "count": 10,
+          "interval": 4.0,
+          "delay": 6.0,
+          "healthScale": 6.895,
+          "rewardScale": 0.1
+        },
+        {
+          "zombie": "screamer",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 9.0,
+          "healthScale": 6.895,
+          "rewardScale": 0.1
+        },
+        {
+          "zombie": "bloater",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 12.0,
+          "healthScale": 6.895,
+          "rewardScale": 0.1
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 6.895,
+          "rewardScale": 0.1
+        },
+        {
+          "zombie": "brute",
+          "count": 3,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.626,
+          "rewardScale": 0.1
+        }
+      ]
+    },
+    {
+      "bonus": 109,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 32,
+          "interval": 1.25,
+          "delay": 0.0,
+          "healthScale": 7.109,
+          "rewardScale": 0.098
+        },
+        {
+          "zombie": "runner",
+          "count": 19,
+          "interval": 2.11,
+          "delay": 3.0,
+          "healthScale": 7.109,
+          "rewardScale": 0.098
+        },
+        {
+          "zombie": "crawler",
+          "count": 10,
+          "interval": 4.0,
+          "delay": 6.0,
+          "healthScale": 7.109,
+          "rewardScale": 0.098
+        },
+        {
+          "zombie": "screamer",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 9.0,
+          "healthScale": 7.109,
+          "rewardScale": 0.098
+        },
+        {
+          "zombie": "bloater",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 12.0,
+          "healthScale": 7.109,
+          "rewardScale": 0.098
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 7.109,
+          "rewardScale": 0.098
+        },
+        {
+          "zombie": "brute",
+          "count": 3,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.666,
+          "rewardScale": 0.098
+        }
+      ]
+    },
+    {
+      "bonus": 111,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 33,
+          "interval": 1.21,
+          "delay": 0.0,
+          "healthScale": 7.326,
+          "rewardScale": 0.096
+        },
+        {
+          "zombie": "runner",
+          "count": 20,
+          "interval": 2.0,
+          "delay": 3.0,
+          "healthScale": 7.326,
+          "rewardScale": 0.096
+        },
+        {
+          "zombie": "crawler",
+          "count": 10,
+          "interval": 4.0,
+          "delay": 6.0,
+          "healthScale": 7.326,
+          "rewardScale": 0.096
+        },
+        {
+          "zombie": "screamer",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 9.0,
+          "healthScale": 7.326,
+          "rewardScale": 0.096
+        },
+        {
+          "zombie": "bloater",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 12.0,
+          "healthScale": 7.326,
+          "rewardScale": 0.096
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 7.326,
+          "rewardScale": 0.096
+        },
+        {
+          "zombie": "brute",
+          "count": 3,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.707,
+          "rewardScale": 0.096
+        }
+      ]
+    },
+    {
+      "bonus": 113,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 34,
+          "interval": 1.18,
+          "delay": 0.0,
+          "healthScale": 7.547,
+          "rewardScale": 0.094
+        },
+        {
+          "zombie": "runner",
+          "count": 20,
+          "interval": 2.0,
+          "delay": 3.0,
+          "healthScale": 7.547,
+          "rewardScale": 0.094
+        },
+        {
+          "zombie": "crawler",
+          "count": 11,
+          "interval": 3.64,
+          "delay": 6.0,
+          "healthScale": 7.547,
+          "rewardScale": 0.094
+        },
+        {
+          "zombie": "screamer",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 9.0,
+          "healthScale": 7.547,
+          "rewardScale": 0.094
+        },
+        {
+          "zombie": "bloater",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 12.0,
+          "healthScale": 7.547,
+          "rewardScale": 0.094
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 7.547,
+          "rewardScale": 0.094
+        },
+        {
+          "zombie": "brute",
+          "count": 3,
+          "interval": 6,
+          "delay": 10,
+          "healthScale": 2.747,
+          "rewardScale": 0.094
+        }
+      ]
+    },
+    {
+      "bonus": 115,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 35,
+          "interval": 1.14,
+          "delay": 0.0,
+          "healthScale": 7.772,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "runner",
+          "count": 21,
+          "interval": 1.9,
+          "delay": 3.0,
+          "healthScale": 7.772,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "crawler",
+          "count": 11,
+          "interval": 3.64,
+          "delay": 6.0,
+          "healthScale": 7.772,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "screamer",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 9.0,
+          "healthScale": 7.772,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "bloater",
+          "count": 4,
+          "interval": 10.0,
+          "delay": 12.0,
+          "healthScale": 7.772,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "armored",
+          "count": 5,
+          "interval": 8.0,
+          "delay": 15.0,
+          "healthScale": 7.772,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "behemoth",
+          "count": 1,
+          "interval": 5,
+          "delay": 20.0,
+          "healthScale": 2.788,
+          "rewardScale": 0.093
+        },
+        {
+          "zombie": "brute",
+          "count": 4,
+          "interval": 5,
+          "delay": 20.0,
+          "healthScale": 2.788,
+          "rewardScale": 0.093
+        }
+      ],
+      "boss": true
     }
   ]
 }

@@ -27,9 +27,12 @@ struct GameScreen: View {
                     VStack(spacing: 0) {
                         TopStrip(session: session, onMenu: onMenu)
                         MapView(session: session)
-                        ContextPanel(session: session)
-                            .frame(height: 118, alignment: .top)
-                            .padding(.top, 6)
+                        ScrollView {
+                            ContextPanel(session: session)
+                        }
+                        .scrollIndicators(.hidden)
+                        .frame(height: 118, alignment: .top)
+                        .padding(.top, 6)
                         ControlBar(session: session)
                     }
                 }
@@ -102,7 +105,7 @@ struct FoldedGameLayout: View {
         let scene = session.scene!.size
         let paneHeight = size.height - 46
         let mapHeight = min(paneHeight, mapWidth * scene.height / scene.width)
-        // Room under the map for the next wave, so the side bar can keep to the controls.
+        // Room under the map for the next round, so the side bar can keep to the controls.
         let intelUnderMap = paneHeight - mapHeight >= 120
         VStack(spacing: 0) {
             TopStrip(session: session, onMenu: onMenu)
@@ -233,7 +236,7 @@ struct EndOverlay: View {
                 }
                 HStack(spacing: 24) {
                     stat("KILLS", "\(session.kills)")
-                    stat("WAVES", "\(session.wavesStarted)/\(session.game.waveCount)")
+                    stat("ROUNDS", "\(session.wavesStarted)/\(session.game.waveCount)")
                     stat("COMMAND POST", "\(session.commandPostHealth)/\(session.level.commandPostHealth)")
                 }
                 HStack(spacing: 10) {

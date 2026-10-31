@@ -21,8 +21,27 @@ struct MapView: View {
                 slotMarkers(scale: scale, origin: origin)
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
+            .overlay {
+                if session.isPaused && !session.isOver { pausedBanner }
+            }
         }
         .background(Theme.mapSurround)
+    }
+
+    /// Shown over the map while the game is paused, so it can't be missed.
+    /// Building and upgrading still work while paused.
+    private var pausedBanner: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "pause.fill").font(.system(size: 22, weight: .bold))
+            Text("PAUSED").font(.stencil(20)).tracking(2)
+            Text("Tap play to carry on").font(.system(size: 12))
+        }
+        .foregroundStyle(Theme.text)
+        .padding(.horizontal, 20).padding(.vertical, 12)
+        .background(Color.black.opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("paused-banner")
     }
 
     private func slotMarkers(scale: CGFloat, origin: CGPoint) -> some View {

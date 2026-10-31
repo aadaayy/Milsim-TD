@@ -4,13 +4,13 @@ Last Perimeter, a milsim tower defense game for iPhone, and its art. Models are 
 
 ## The app
 
-The app plays chapter 1, level 1 ("Crossroads"): build rifle squads, machine gun nests and sniper teams on the pads beside the road, start each wave, upgrade or sell positions, and hold the Command Post through five waves of walkers and runners.
+The app plays chapter 1, level 1 ("Crossroads"): build rifle squads, machine gun nests and sniper teams on the pads beside the road, start each round, upgrade or sell positions, and hold the Command Post for 50 rounds. Each position goes to level 2, then to one of two level 3 versions (3A or 3B). Walkers and runners come first; crawlers, screamers, bloaters and armored zombies join over the rounds, with a Brute boss every tenth round and the Behemoth at rounds 25 and 50. Pause and the speed button (1x, 2x, 3x) are on every layout.
 
 It fits four phones:
 
 - a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top, controls under it for one thumb
-- the iPhone Duo folded: the level strip across the top, the battlefield on the left with the next wave under it, and a side bar on the right with supply, the build menu or position card, and the wave, pause and speed buttons
-- the iPhone Duo open: battlefield on one half, the full command panel (build menu with descriptions, position card with its next upgrade, wave intel) on the other
+- the iPhone Duo folded: the level strip across the top, the battlefield on the left with the next round under it, and a side bar on the right with supply, the build menu or position card, and the round, pause and speed buttons
+- the iPhone Duo open: battlefield on one half, the full command panel (build menu with descriptions, position card with its next upgrade or level 3 choice, round intel) on the other
 
 ```
 LastPerimeter/
@@ -24,7 +24,7 @@ Tests/         logic tests (swift test)
 Tools/         scripts that turn the art into app images and the app icon
 ```
 
-To change balance, edit the JSON in `LastPerimeter/Data`; the logic tests check a level can be lost with no defense and won with a good one. After new art is exported, run `python3 Tools/make_sprites.py` from the repository root.
+To change balance, edit the JSON in `LastPerimeter/Data`. The rounds are made by `python3 Tools/make_waves.py` from a few dials (how fast the horde and its health grow, when each zombie type arrives, the boss rounds), so retune them there and rerun it. The logic tests play all 50 rounds for real: a strong build order (`AutoPlayer.firstMap`) must win, the same build without level 3 must fall in the late rounds, and no defense must fall at once. After new art is exported, run `python3 Tools/make_sprites.py` from the repository root.
 
 ### Run it on your phone
 

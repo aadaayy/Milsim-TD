@@ -5,6 +5,8 @@ struct WaveSchedule {
     struct Spawn: Equatable {
         var time: Double
         var zombie: String
+        var healthScale: Double = 1
+        var rewardScale: Double = 1
     }
 
     private(set) var pending: [Spawn]
@@ -14,7 +16,8 @@ struct WaveSchedule {
         var spawns: [Spawn] = []
         for group in wave.groups {
             for i in 0..<max(group.count, 0) {
-                spawns.append(Spawn(time: group.delay + Double(i) * group.interval, zombie: group.zombie))
+                spawns.append(Spawn(time: group.delay + Double(i) * group.interval, zombie: group.zombie,
+                                    healthScale: group.healthScale ?? 1, rewardScale: group.rewardScale ?? 1))
             }
         }
         // Stable order for spawns at the same moment.
@@ -27,11 +30,11 @@ struct WaveSchedule {
     var remaining: Int { pending.count }
 
     /// Moves the clock on and returns the zombies due by now.
-    mutating func advance(_ dt: Double) -> [String] {
+    mutating func advance(_ dt: Double) -> [Spawn] {
         clock += dt
-        var due: [String] = []
+        var due: [Spawn] = []
         while let next = pending.first, next.time <= clock {
-            due.append(next.zombie)
+            due.append(next)
             pending.removeFirst()
         }
         return due

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The thin strip above the map: menu, level name, wave and Command Post health.
+/// The thin strip above the map: menu, level name, round and Command Post health.
 struct TopStrip: View {
     let session: GameSession
     let onMenu: () -> Void
@@ -22,8 +22,9 @@ struct TopStrip: View {
                     .font(.stencil(16)).foregroundStyle(Theme.text)
             }
             Spacer(minLength: 4)
-            Text("WAVE \(max(session.wavesStarted, 1))/\(session.game.waveCount)")
+            Text("ROUND \(max(session.wavesStarted, 1))/\(session.game.waveCount)")
                 .font(.stencil(15)).foregroundStyle(Theme.text)
+                .lineLimit(1).minimumScaleFactor(0.7)
                 .accessibilityIdentifier("wave-label")
             CommandPostHealth(session: session)
         }
@@ -57,10 +58,10 @@ struct CommandPostHealth: View {
     }
 }
 
-/// Supply, the wave button, pause and speed: everything a thumb needs, along the bottom.
+/// Supply, the round button, pause and speed: everything a thumb needs, along the bottom.
 struct ControlBar: View {
     let session: GameSession
-    /// The folded Duo's side bar: the wave button on its own row, pause and
+    /// The folded Duo's side bar: the round button on its own row, pause and
     /// speed under it. The side bar shows supply at its top instead.
     var column = false
 
@@ -101,14 +102,14 @@ struct ControlBar: View {
             Image(systemName: session.isPaused ? "play.fill" : "pause.fill")
                 .frame(maxWidth: column ? .infinity : nil)
         }
-        .buttonStyle(IconButtonStyle())
+        .buttonStyle(IconButtonStyle(lit: session.isPaused))
         .accessibilityLabel(session.isPaused ? "Resume" : "Pause")
         .accessibilityIdentifier("pause")
         Button(action: session.cycleSpeed) {
             Text("\(session.speed)×").font(.readout(16))
                 .frame(maxWidth: column ? .infinity : nil)
         }
-        .buttonStyle(IconButtonStyle())
+        .buttonStyle(IconButtonStyle(lit: session.speed > 1))
         .accessibilityLabel("Speed \(session.speed) times")
         .accessibilityIdentifier("speed")
     }
@@ -123,14 +124,15 @@ struct ControlBar: View {
     private var waveButtonContent: some View {
         switch session.phase {
         case .build:
-            Button("START WAVE 1", action: session.startNextWave)
+            Button("START ROUND 1", action: session.startNextWave)
                 .buttonStyle(PrimaryButtonStyle())
                 .frame(maxWidth: .infinity)
                 .accessibilityIdentifier("start-wave")
         case .pause:
             Button(action: session.startNextWave) {
                 HStack(spacing: 6) {
-                    Text("WAVE \(session.wavesStarted + 1)")
+                    Text("ROUND \(session.wavesStarted + 1)")
+                    if session.game.nextWave?.boss == true { Text("BOSS") }
                     Text("IN \(session.breakSeconds)").font(.readout(14))
                     Image(systemName: "forward.fill").font(.system(size: 12))
                 }
@@ -146,7 +148,9 @@ struct ControlBar: View {
         default:
             HStack(spacing: 6) {
                 Circle().fill(Theme.alert).frame(width: 8, height: 8)
-                Text("WAVE \(session.wavesStarted) INBOUND").font(.stencil(15)).foregroundStyle(Theme.text)
+                Text(session.game.level.waves[safe: session.wavesStarted - 1]?.boss == true
+                     ? "BOSS ROUND \(session.wavesStarted)" : "ROUND \(session.wavesStarted) INBOUND")
+                    .font(.stencil(15)).foregroundStyle(Theme.text)
             }
             .frame(maxWidth: .infinity, minHeight: 46)
             .panel()
@@ -162,7 +166,7 @@ struct ContextPanel: View {
     var roomy = false
     /// The folded Duo's narrow side bar: things stack instead of sitting side by side.
     var column = false
-    /// False when the next wave is shown elsewhere (under the folded Duo's map).
+    /// False when the next round is shown elsewhere (under the folded Duo's map).
     var showsIntel = true
 
     var body: some View {
@@ -292,8 +296,8 @@ struct PositionCard: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(type.name.uppercased()).font(.stencil(roomy ? 18 : 15)).foregroundStyle(Theme.text)
                             HStack(spacing: 4) {
-                                Image("badge_level_\(position.level + 1)").resizable().frame(width: 16, height: 16)
-                                Text("Level \(position.level + 1): \(level.title)")
+                                Image("badge_level_\(position.levelName.lowercased())").resizable().frame(width: 16, height: 16)
+                                Text("Level \(position.levelName): \(level.title)")
                                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                             }
                             StatRow(level: level, kills: position.kills)
@@ -308,9 +312,10 @@ struct PositionCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if column { columnPriorityPicker(position) } else { priorityPicker(position) }
+                if session.game.upgradeOptions(of: position).count > 1 { levelThreeChoice(position) }
                 if column { actions(position) }
                 if roomy {
-                    if let next = session.game.nextLevelSpec(of: position) {
+                    if let next = singleUpgrade(position) {
                         HStack(spacing: 8) {
                             Portrait(name: next.sprite, size: 44)
                             VStack(alignment: .leading, spacing: 2) {
@@ -336,8 +341,8 @@ struct PositionCard: View {
                     .lineLimit(2).minimumScaleFactor(0.7)
             }
             HStack(spacing: 4) {
-                Image("badge_level_\(position.level + 1)").resizable().frame(width: 16, height: 16)
-                Text("Level \(position.level + 1): \(level.title)")
+                Image("badge_level_\(position.levelName.lowercased())").resizable().frame(width: 16, height: 16)
+                Text("Level \(position.levelName): \(level.title)")
                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                     .lineLimit(2).minimumScaleFactor(0.8)
             }
@@ -392,9 +397,61 @@ struct PositionCard: View {
         }
     }
 
+    /// The next level when there's just one; nil at the top or when level 3 is a choice.
+    private func singleUpgrade(_ position: Position) -> PositionLevel? {
+        let options = session.game.upgradeOptions(of: position)
+        return options.count == 1 ? options[0] : nil
+    }
+
+    /// Level 3 comes in two versions: a button for each, with what it's good
+    /// at when there's room. Picking one is for good, like an upgrade.
+    private func levelThreeChoice(_ position: Position) -> some View {
+        let options = session.game.upgradeOptions(of: position)
+        let layout = column ? AnyLayout(VStackLayout(spacing: 6)) : AnyLayout(HStackLayout(spacing: 6))
+        return VStack(alignment: .leading, spacing: 4) {
+            if roomy || column {
+                Text("LEVEL 3: PICK ONE").font(.stencil(11)).foregroundStyle(Theme.dim)
+            }
+            layout {
+                ForEach(Array(options.enumerated()), id: \.offset) { branch, option in
+                    choiceButton(position, branch: branch, option: option)
+                }
+            }
+        }
+    }
+
+    private func choiceButton(_ position: Position, branch: Int, option: PositionLevel) -> some View {
+        let name = branch == 0 ? "3A" : "3B"
+        let affordable = session.game.canUpgrade(position.id, branch: branch)
+        return Button { session.upgrade(position.id, branch: branch) } label: {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Image("badge_level_\(name.lowercased())").resizable().frame(width: 16, height: 16)
+                    Text(option.title.uppercased()).font(.stencil(13))
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                    Spacer(minLength: 2)
+                    Image("badge_upgrade").resizable().frame(width: 14, height: 14)
+                    Text("\(option.cost)").font(.readout(13))
+                }
+                if roomy || column, let about = option.about {
+                    Text(about).font(.system(size: 11)).tracking(0)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.vertical, roomy || column ? 6 : 0)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(PrimaryButtonStyle(color: branch == 0 ? Theme.sand : Theme.olive, height: roomy || column ? 46 : 34, inset: 8))
+        .disabled(!affordable)
+        .opacity(affordable ? 1 : 0.45)
+        .accessibilityLabel("Level 3\(branch == 0 ? "A" : "B"), \(option.title), for \(option.cost) supply")
+        .accessibilityIdentifier("upgrade-\(name.lowercased())")
+    }
+
     @ViewBuilder
     private func actions(_ position: Position) -> some View {
-        let next = session.game.nextLevelSpec(of: position)
+        let next = singleUpgrade(position)
         let wide = roomy || column
         // The side bar is too narrow for two buttons side by side, so they stack at full width.
         let layout = roomy ? AnyLayout(HStackLayout(spacing: 8)) : AnyLayout(VStackLayout(spacing: column ? 8 : 6))
@@ -464,7 +521,7 @@ struct StatRow: View {
     }
 }
 
-/// What the next wave holds, with the field manual's words on each zombie when there's room.
+/// What the next round holds, with the field manual's words on each zombie when there's room.
 struct WaveIntel: View {
     let session: GameSession
     var roomy = false
@@ -479,30 +536,28 @@ struct WaveIntel: View {
             if let wave = session.level.waves[safe: waveIndex] {
                 let header = column ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2)) : AnyLayout(HStackLayout())
                 header {
-                    Text(session.phase == .wave ? "ON THE ROAD: WAVE \(waveIndex + 1)" : "NEXT: WAVE \(waveIndex + 1)")
-                        .font(.stencil(13)).foregroundStyle(Theme.dim)
-                        .lineLimit(1).minimumScaleFactor(0.7)
+                    HStack(spacing: 6) {
+                        Text(session.phase == .wave ? "ON THE ROAD: ROUND \(waveIndex + 1)" : "NEXT: ROUND \(waveIndex + 1)")
+                            .font(.stencil(13)).foregroundStyle(Theme.dim)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        if wave.boss == true {
+                            Text("BOSS").font(.stencil(11)).foregroundStyle(Theme.background)
+                                .padding(.horizontal, 6).padding(.vertical, 1)
+                                .background(Theme.alert, in: Capsule())
+                                .accessibilityIdentifier("boss-tag")
+                        }
+                    }
                     if !column { Spacer() }
                     Text("\(wave.total) hostiles").font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                 }
-                let layout = roomy || column ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
-                layout {
-                    ForEach(wave.counts.map { $0.zombie }, id: \.self) { zombieID in
-                        let count = wave.counts.first(where: { $0.zombie == zombieID })?.count ?? 0
-                        if let zombie = session.catalog.zombie(zombieID) {
-                            HStack(alignment: column ? .center : .top, spacing: 8) {
-                                Portrait(name: zombie.id, size: roomy ? 52 : column ? 34 : 40)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("\(count) × \(zombie.name.uppercased())").font(.stencil(14)).foregroundStyle(Theme.text)
-                                        .lineLimit(2).minimumScaleFactor(0.8)
-                                    if roomy {
-                                        Text(zombie.manual).font(.system(size: 12)).foregroundStyle(Theme.dim)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                }
-                            }
-                        }
+                if roomy || column {
+                    VStack(alignment: .leading, spacing: 8) { zombieRows(wave) }
+                } else {
+                    // Late rounds hold up to eight kinds, so the short strip scrolls sideways.
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 10) { zombieRows(wave) }
                     }
+                    .scrollIndicators(.hidden)
                 }
             }
             if session.phase == .build {
@@ -513,6 +568,30 @@ struct WaveIntel: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("wave-intel")
+    }
+
+    @ViewBuilder
+    private func zombieRows(_ wave: WaveSpec) -> some View {
+        ForEach(wave.counts.map { $0.zombie }, id: \.self) { zombieID in
+            let count = wave.counts.first(where: { $0.zombie == zombieID })?.count ?? 0
+            if let zombie = session.catalog.zombie(zombieID) {
+                HStack(alignment: column || !roomy ? .center : .top, spacing: roomy || column ? 8 : 4) {
+                    Portrait(name: zombie.id, size: roomy ? 52 : column ? 34 : 36)
+                    VStack(alignment: .leading, spacing: 2) {
+                        // The short strip gives the count only; the name is on the portrait's card.
+                        Text(roomy || column ? "\(count) × \(zombie.name.uppercased())" : "×\(count)")
+                            .font(.stencil(14)).foregroundStyle(zombie.boss == true ? Theme.alert : Theme.text)
+                            .lineLimit(2).minimumScaleFactor(0.8)
+                        if roomy {
+                            Text(zombie.manual).font(.system(size: 12)).foregroundStyle(Theme.dim)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(count) \(zombie.name)")
+            }
+        }
     }
 }
 

@@ -38,6 +38,8 @@ final class GameSession {
     /// 1, 2 or 3 times normal speed.
     var speed = 1
     var isPaused = false
+    /// While a screenshot setup plays ahead, the scene doesn't move the game itself.
+    private var isSettingUp = false
 
     init(content: GameContent = .shared, levelIndex: Int = 0) {
         self.content = content
@@ -58,7 +60,7 @@ final class GameSession {
     }
 
     /// Game seconds per real second, 0 while paused or over.
-    var timeScale: Double { isPaused || game.isOver ? 0 : Double(speed) }
+    var timeScale: Double { isPaused || isSettingUp || game.isOver ? 0 : Double(speed) }
 
     /// Copies the game's numbers, setting only the ones that changed.
     func refresh() {
@@ -90,8 +92,9 @@ final class GameSession {
         selection = .position(id)
     }
 
-    func upgrade(_ id: Int) {
-        guard !game.upgrade(id).isEmpty else { return }
+    /// `branch` picks 3A (0) or 3B (1) when the upgrade is to level 3.
+    func upgrade(_ id: Int, branch: Int = 0) {
+        guard !game.upgrade(id, branch: branch).isEmpty else { return }
         Haptics.tap()
         positionsVersion += 1
         refresh()
@@ -138,9 +141,12 @@ final class GameSession {
     // MARK: Screenshot setups
 
     /// Applies the automatic checks' launch arguments: "-demo" builds a defense,
-    /// "-startWave N" sends wave N, "-selectSlot N" and "-selectPosition N" pick
-    /// on the map, "-speed N" and "-endScreen win|lose" jump ahead.
-    func applyLaunchArguments(_ arguments: [String]) {
+    /// "-startWave N" sends round N, "-playTo N" plays the strong build order for
+    /// real until round N starts, "-selectSlot N" and "-selectPosition N" pick on
+    /// the map, "-speed N", "-paused" and "-endScreen win|lose" jump ahead.
+    /// The long setups play the level ahead in short bursts, so the app stays
+    /// responsive (and the automatic checks can see it launch) while they run.
+    func applyLaunchArguments(_ arguments: [String]) async {
         func value(_ flag: String) -> String? {
             guard let i = arguments.firstIndex(of: flag), i + 1 < arguments.count else { return nil }
             return arguments[i + 1]
@@ -152,7 +158,7 @@ final class GameSession {
             }
             if let p = game.position(onSlot: 3) { game.upgrade(p.id) }
             if let p = game.position(onSlot: 1) { game.upgrade(p.id) }
-            game.grantSupply(-(game.supply - 145))
+            game.grantSupply(-(game.supply - 245))
             positionsVersion += 1
             scene.positionsChanged()
         }
@@ -162,24 +168,42 @@ final class GameSession {
             // Let the wave walk in a little way so the screenshot has a crowd.
             scene.fastForward(seconds: Double(value("-warmup").flatMap(Double.init) ?? 20))
         }
+        if let round = value("-playTo").flatMap(Int.init), round > 0 {
+            var player = AutoPlayer(steps: AutoPlayer.firstMap)
+            await playAhead(&player) { $0.wavesStarted >= round }
+            scene.fastForward(seconds: Double(value("-warmup").flatMap(Double.init) ?? 15))
+            positionsVersion += 1
+            scene.positionsChanged()
+        }
         if let slot = value("-selectSlot").flatMap(Int.init) { selection = .slot(slot) }
         if let slot = value("-selectPosition").flatMap(Int.init), let p = game.position(onSlot: slot) {
             selection = .position(p.id)
         }
         if let speed = value("-speed").flatMap(Int.init) { self.speed = min(max(speed, 1), 3) }
+        if arguments.contains("-paused") { isPaused = true }
         if let end = value("-endScreen") {
-            // Play the level out for real (no drawing), so the end screen's
-            // numbers are true; force the asked-for ending only if it differs.
-            var seconds = 0.0
-            while !game.isOver && seconds < 1800 {
-                if case .build = game.phase { _ = game.startNextWave() }
-                _ = game.tick(1.0 / 30)
-                seconds += 1.0 / 30
-            }
+            // Play all the rounds out for real (no drawing) with the strong build
+            // order, so the end screen's numbers are true; force the asked-for
+            // ending only if it differs.
+            var player = AutoPlayer(steps: AutoPlayer.firstMap)
+            await playAhead(&player) { _ in false }
+            positionsVersion += 1
+            scene.positionsChanged()
             let won: Bool = { if case .won = game.phase { return true }; return false }()
             if !game.isOver || won != (end == "win") { game.forceEnd(won: end == "win") }
         }
         refresh()
+    }
+
+    /// Plays the strong build order until `stop` says so or the level ends.
+    private func playAhead(_ player: inout AutoPlayer, until stop: (GameState) -> Bool) async {
+        isSettingUp = true
+        defer { isSettingUp = false }
+        while !game.isOver && !stop(game) {
+            player.play(game, maxSeconds: 15, stop: stop)
+            refresh()
+            try? await Task.sleep(nanoseconds: 2_000_000)
+        }
     }
 }
 

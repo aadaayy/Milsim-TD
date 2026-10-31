@@ -28,9 +28,9 @@ struct RootView: View {
     private func startFromLaunchArguments() {
         let arguments = ProcessInfo.processInfo.arguments
         guard session == nil, arguments.contains("-uiTesting"),
-              ["-play", "-demo", "-startWave", "-endScreen"].contains(where: { arguments.contains($0) }) else { return }
+              ["-play", "-demo", "-startWave", "-playTo", "-endScreen"].contains(where: { arguments.contains($0) }) else { return }
         let new = GameSession(content: content, levelIndex: 0)
-        new.applyLaunchArguments(arguments)
         session = new
+        Task { await new.applyLaunchArguments(arguments) }
     }
 }

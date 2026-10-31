@@ -63,6 +63,68 @@
         0.0977
       ]
     },
+    "rifle_squad_3a": {
+      "atlas": "rifle_squad_3a",
+      "label": "Level 3A: Spec ops",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        4.0625,
+        3.75
+      ],
+      "cell_m": [
+        3.4062,
+        3.5547
+      ],
+      "offset_m": [
+        0.1875,
+        0.0977
+      ]
+    },
+    "rifle_squad_3b": {
+      "atlas": "rifle_squad_3b",
+      "label": "Level 3B: Grenadiers",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        4.0625,
+        3.7031
+      ],
+      "cell_m": [
+        3.3281,
+        3.5
+      ],
+      "offset_m": [
+        0.1797,
+        0.1016
+      ]
+    },
     "mg_nest_1": {
       "atlas": "mg_nest_1",
       "label": "Level 1: LMG team",
@@ -122,6 +184,69 @@
       ],
       "offset_m": [
         0.1055,
+        0.0547
+      ]
+    },
+    "mg_nest_3a": {
+      "atlas": "mg_nest_3a",
+      "label": "Level 3A: Rotary gun",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2",
+        "fire3"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        4.6094,
+        4.1875
+      ],
+      "cell_m": [
+        3.4531,
+        3.3125
+      ],
+      "offset_m": [
+        0.0703,
+        0.0625
+      ]
+    },
+    "mg_nest_3b": {
+      "atlas": "mg_nest_3b",
+      "label": "Level 3B: Twin HMG",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        5.0,
+        4.2031
+      ],
+      "cell_m": [
+        4.3047,
+        4.0938
+      ],
+      "offset_m": [
+        0.1211,
         0.0547
       ]
     },
@@ -186,6 +311,68 @@
         0.0117,
         0.0078
       ]
+    },
+    "sniper_3a": {
+      "atlas": "sniper_3a",
+      "label": "Level 3A: Anti-materiel",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        4.4688,
+        3.8594
+      ],
+      "cell_m": [
+        3.9453,
+        3.5547
+      ],
+      "offset_m": [
+        0.0352,
+        0.0195
+      ]
+    },
+    "sniper_3b": {
+      "atlas": "sniper_3b",
+      "label": "Level 3B: Overwatch tower",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        5.3906,
+        6.4062
+      ],
+      "cell_m": [
+        4.0938,
+        5.7891
+      ],
+      "offset_m": [
+        0.6406,
+        0.3086
+      ]
     }
   },
   "zombies": {
@@ -234,6 +421,210 @@
         "walk": {
           "frames": 8,
           "fps": 12,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "crawler": {
+      "atlas": "crawler",
+      "label": "Crawler",
+      "cell_m": [
+        2.5312,
+        2.375
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "screamer": {
+      "atlas": "screamer",
+      "label": "Screamer",
+      "cell_m": [
+        2.6719,
+        2.9375
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "bloater": {
+      "atlas": "bloater",
+      "label": "Bloater",
+      "cell_m": [
+        2.625,
+        2.8438
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "armored": {
+      "atlas": "armored",
+      "label": "Armored",
+      "cell_m": [
+        3.0938,
+        3.3281
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "brute": {
+      "atlas": "brute",
+      "label": "Brute",
+      "cell_m": [
+        3.5312,
+        3.8594
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "behemoth": {
+      "atlas": "behemoth",
+      "label": "Behemoth",
+      "cell_m": [
+        5.0625,
+        5.5469
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
           "dirs": [
             "n",
             "nw",

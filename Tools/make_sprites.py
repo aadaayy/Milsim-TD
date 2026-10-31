@@ -27,11 +27,15 @@ UI = CATALOG / "UI"
 PPM = 128  # pixels per meter in the Blender renders
 
 # What the prototype uses. Add names here to bring more art into the game.
-POSITIONS = ["rifle_squad_1", "rifle_squad_2", "mg_nest_1", "mg_nest_2", "sniper_1", "sniper_2"]
-ZOMBIES = ["walker", "runner"]
+POSITIONS = [f"{kind}_{level}" for kind in ("rifle_squad", "mg_nest", "sniper") for level in ("1", "2", "3a", "3b")]
+ZOMBIES = ["walker", "runner", "crawler", "screamer", "bloater", "armored", "brute", "behemoth"]
+# The game only plays these zombie animations so far; the rest stay out to keep the app small.
+ZOMBIE_ANIMS = {"walk", "death"}
+# Big zombies are shrunk further so no frame is more than this many pixels across.
+ZOMBIE_MAX_PX = 260
 EFFECTS = ["muzzle_flash", "tracer", "hit_puff", "smoke_puff", "explosion_small"]
 PORTRAITS = POSITIONS + ZOMBIES + ["command_post"]
-BADGES = ["supply", "star", "star_empty", "upgrade", "sell", "level_1", "level_2", "noise_meter",
+BADGES = ["supply", "star", "star_empty", "upgrade", "sell", "level_1", "level_2", "level_3a", "level_3b", "noise_meter",
           "priority_first", "priority_strongest", "priority_closest", "ammo"]
 
 # How much each kind of sprite is shrunk from the 128 px/m renders.
@@ -106,12 +110,14 @@ def turreted(group, name, kind, prefix):
 def zombie(name):
     src = ART / "zombies" / "exports" / name
     info = json.loads((src / "sheet.json").read_text())
-    factor = SCALE["zombie"]
+    factor = min(SCALE["zombie"], ZOMBIE_MAX_PX / max(info["cell"]))
     out = atlas(name)
     sheet = Image.open(src / "sheet.png")
     dirs = {}
     for key, rect in info["rects"].items():
         anim, _, facing = key.split("_")
+        if anim not in ZOMBIE_ANIMS:
+            continue
         imageset(out, f"{name}_{key}", shrink(crop(sheet, rect), factor))
         dirs.setdefault(anim, [])
         if facing not in dirs[anim]:
@@ -122,7 +128,7 @@ def zombie(name):
         "label": info["label"],
         "cell_m": [meters(cw), meters(ch)],
         "anims": {anim: {"frames": count, "fps": info["fps"][anim], "dirs": dirs[anim]}
-                  for anim, count in info["anims"].items()},
+                  for anim, count in info["anims"].items() if anim in ZOMBIE_ANIMS},
     }
 
 

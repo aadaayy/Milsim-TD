@@ -34,9 +34,12 @@ final class GameTests: XCTestCase {
         let (level, catalog) = try load()
         XCTAssertEqual(level.problems(catalog: catalog), [])
         XCTAssertEqual(level.slots.count, 10)
+        XCTAssertEqual(level.waves.count, 50, "The first map runs 50 rounds")
+        XCTAssertEqual(level.waves.filter { $0.boss == true }.count, 7)
         for type in catalog.positions {
-            XCTAssertEqual(type.levels.count, 2, "\(type.id) should have levels 1 and 2 for now")
-            for level in type.levels {
+            XCTAssertEqual(type.levels.count, 2, "\(type.id) should have levels 1 and 2")
+            XCTAssertEqual(type.specializations?.count, 2, "\(type.id) should have a 3A and a 3B")
+            for level in type.levels + (type.specializations ?? []) {
                 XCTAssertGreaterThan(level.cost, 0)
                 XCTAssertGreaterThan(level.range, 0)
                 XCTAssertGreaterThan(level.fireInterval, 0)
@@ -81,11 +84,32 @@ final class GameTests: XCTestCase {
         XCTAssertFalse(game.upgrade(id).isEmpty)
         XCTAssertEqual(game.supply, 20)
         XCTAssertEqual(game.position(id: id)?.level, 1)
-        XCTAssertFalse(game.canUpgrade(id), "Level 2 is the top for now")
+        let p = try XCTUnwrap(game.position(id: id))
+        XCTAssertEqual(game.upgradeOptions(of: p).map(\.title), ["Spec ops", "Grenadiers"], "Level 3 is a choice")
         XCTAssertEqual(game.refund(for: id), 91)
+        game.grantSupply(200)
+        XCTAssertFalse(game.upgrade(id, branch: 1).isEmpty)
+        XCTAssertEqual(game.supply, 50)
+        let top = try XCTUnwrap(game.position(id: id))
+        XCTAssertEqual(top.levelName, "3B")
+        XCTAssertEqual(game.levelSpec(of: top)?.title, "Grenadiers")
+        XCTAssertFalse(game.canUpgrade(id), "Level 3 is the top")
+        XCTAssertEqual(game.refund(for: id), 210)
         game.sell(id)
-        XCTAssertEqual(game.supply, 111)
+        XCTAssertEqual(game.supply, 260)
         XCTAssertNil(game.position(onSlot: 3))
+    }
+
+    func testArmorPierceAndSplash() throws {
+        let (level, catalog) = try load()
+        let game = GameState(level: level, catalog: catalog)
+        let armored = Zombie(id: 1, type: "armored", health: 140, maxHealth: 140, distance: 0, speed: 1, lane: 0, reward: 1)
+        let rifle = try XCTUnwrap(catalog.position("rifle_squad")?.levels[0])
+        XCTAssertEqual(game.hitDamage(rifle, on: armored), rifle.damage * 0.15, accuracy: 0.001,
+                       "Rifle rounds barely scratch armor")
+        let sniper = try XCTUnwrap(catalog.position("sniper_team")?.levels[0])
+        XCTAssertEqual(game.hitDamage(sniper, on: armored), sniper.damage, accuracy: 0.001, "A sniper pierces it")
+        XCTAssertNotNil(catalog.position("rifle_squad")?.specializations?[1].splash, "Grenadiers splash")
     }
 
     func testNoDefenseLoses() throws {
@@ -94,7 +118,7 @@ final class GameTests: XCTestCase {
         let events = play(game)
         XCTAssertEqual(game.phase, .lost)
         XCTAssertTrue(events.contains(.lost))
-        XCTAssertLessThanOrEqual(game.wavesStarted, 2, "Undefended, the Command Post should fall in the first two waves")
+        XCTAssertLessThanOrEqual(game.wavesStarted, 3, "Undefended, the Command Post should fall in the first three rounds")
     }
 
     func testTwoRiflesHoldTheFirstWave() throws {
@@ -106,9 +130,9 @@ final class GameTests: XCTestCase {
             if case .pause = game.phase { return true }
             return false
         }
-        XCTAssertTrue(events.contains(.waveCleared(number: 1, bonus: 30)))
-        XCTAssertGreaterThanOrEqual(game.commandPostHealth, 13)
-        XCTAssertEqual(game.kills + (15 - game.commandPostHealth), 8, "Every Walker in wave 1 is killed or gets through")
+        XCTAssertTrue(events.contains(.waveCleared(number: 1, bonus: 17)))
+        XCTAssertGreaterThanOrEqual(game.commandPostHealth, 18)
+        XCTAssertEqual(game.kills + (20 - game.commandPostHealth), 8, "Every Walker in round 1 is killed or gets through")
         XCTAssertGreaterThan(game.supply, 30)
     }
 
@@ -147,27 +171,36 @@ final class GameTests: XCTestCase {
         XCTAssertEqual(a.2, b.2)
     }
 
-    func testAGoodDefenseWins() throws {
+    /// Plays all 50 rounds with a strong build order, for real.
+    func testAGoodDefenseWinsAllFiftyRounds() throws {
         let (level, catalog) = try load()
         let game = GameState(level: level, catalog: catalog)
-        // Build as supply allows, in this order, upgrading once everything is placed.
-        let plan: [(String, Int)] = [("rifle_squad", 3), ("rifle_squad", 4), ("mg_nest", 1), ("mg_nest", 5),
-                                     ("sniper_team", 7), ("rifle_squad", 6), ("mg_nest", 8), ("sniper_team", 9)]
-        var t = 0.0
-        while !game.isOver && t < 1200 {
-            if let next = plan.first(where: { game.position(onSlot: $0.1) == nil }) {
-                game.build(next.0, onSlot: next.1)
-            } else if let p = game.positions.first(where: { game.canUpgrade($0.id) }) {
-                game.upgrade(p.id)
-            }
-            if case .build = game.phase { game.startNextWave() }
-            _ = game.tick(1.0 / 60)
-            t += 1.0 / 60
-        }
+        var player = AutoPlayer(steps: AutoPlayer.firstMap)
+        let events = player.play(game)
         guard case .won(let stars) = game.phase else {
-            return XCTFail("A full defense should win; ended \(game.phase) on wave \(game.wavesStarted) with \(game.commandPostHealth) health")
+            return XCTFail("A full defense should win; ended \(game.phase) on round \(game.wavesStarted) with \(game.commandPostHealth) health")
         }
-        XCTAssertGreaterThanOrEqual(stars, 1)
-        XCTAssertGreaterThan(game.commandPostHealth, 0)
+        XCTAssertTrue(player.isFinished, "Every position reaches level 3")
+        XCTAssertEqual(game.wavesStarted, 50)
+        XCTAssertGreaterThanOrEqual(stars, 2)
+        XCTAssertTrue(events.contains { if case .killed(_, "behemoth", _, _) = $0 { return true }; return false },
+                      "The Behemoth is killed")
+    }
+
+    /// The same defense without level 3 holds a long while but not to the end.
+    func testWithoutLevelThreeTheLateRoundsAreLost() throws {
+        let (level, catalog) = try load()
+        var upgraded: Set<Int> = []
+        let steps = AutoPlayer.firstMap.filter { step in
+            guard case .upgrade(let slot, _) = step else { return true }
+            return upgraded.insert(slot).inserted
+        }
+        XCTAssertEqual(steps.count, 20)
+        let game = GameState(level: level, catalog: catalog)
+        var player = AutoPlayer(steps: steps)
+        player.play(game)
+        XCTAssertEqual(game.phase, .lost)
+        XCTAssertGreaterThan(game.wavesStarted, 20, "Levels 1 and 2 hold the early rounds")
+        XCTAssertLessThan(game.wavesStarted, 50)
     }
 }

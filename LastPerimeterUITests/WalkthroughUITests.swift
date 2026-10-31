@@ -27,8 +27,8 @@ final class WalkthroughUITests: XCTestCase {
         add(attachment)
     }
 
-    /// Menu, build a rifle squad, start the first wave and watch it come in.
-    func testPlayFirstWave() {
+    /// Menu, build a rifle squad, start the first round and watch it come in at 2x.
+    func testPlayFirstRound() {
         let app = launch()
         XCTAssertTrue(element(app, "play-level").waitForExistence(timeout: 20), "The menu shows the first level")
         capture(app, "1-menu")
@@ -36,7 +36,9 @@ final class WalkthroughUITests: XCTestCase {
         element(app, "play-level").tap()
         let pad = element(app, "slot-3")
         XCTAssertTrue(pad.waitForExistence(timeout: 10), "The battlefield shows its build pads")
-        XCTAssertTrue(element(app, "start-wave").exists, "The first wave waits for the player")
+        XCTAssertTrue(element(app, "start-wave").exists, "The first round waits for the player")
+        XCTAssertTrue(element(app, "pause").exists, "There's a pause button")
+        XCTAssertTrue(element(app, "speed").exists, "There's a speed button")
         if UIDeviceName.current.contains("Duo") {
             XCTAssertTrue(element(app, "side-bar").exists, "The folded Duo puts the controls in a side bar beside the map")
         }
@@ -54,28 +56,47 @@ final class WalkthroughUITests: XCTestCase {
 
         element(app, "start-wave").tap()
         element(app, "speed").tap()
-        sleep(9)
-        capture(app, "5-first-wave")
+        XCTAssertEqual(element(app, "speed").label, "Speed 2 times", "One tap on speed plays at 2x")
+        sleep(5)
+        capture(app, "5-first-round-2x")
     }
 
-    /// A built-up defence in the middle of wave four, with a rifle squad picked.
-    func testBattle() {
-        let app = launch(["-demo", "-startWave", "4", "-warmup", "22", "-selectPosition", "4"])
-        XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 20), "The picked position shows its card")
+    /// A level 2 rifle squad offers its two level 3 versions; pick one.
+    func testLevelThreeChoice() {
+        let app = launch(["-demo", "-startWave", "4", "-warmup", "22", "-selectPosition", "3"])
+        let choice = element(app, "upgrade-3a")
+        XCTAssertTrue(choice.waitForExistence(timeout: 20), "A level 2 position offers level 3A")
+        XCTAssertTrue(element(app, "upgrade-3b").exists, "...and level 3B")
+        sleep(1)
+        capture(app, "6-level-3-choice")
+
+        element(app, "upgrade-3b").tap()
+        sleep(1)
+        XCTAssertFalse(element(app, "upgrade-3a").exists, "Once picked, the choice is made")
+        capture(app, "7-level-3-picked")
+    }
+
+    /// Round 25 played for real: the Behemoth's first appearance, then paused at 2x.
+    func testBossRoundAndPause() {
+        let app = launch(["-playTo", "25", "-warmup", "24", "-speed", "2", "-selectPosition", "3"])
+        XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 240), "Round 25 is reached with a defense up")
+        XCTAssertTrue(element(app, "wave-label").label.contains("25"), "The strip shows round 25")
         sleep(2)
-        capture(app, "6-battle")
+        capture(app, "8-boss-round")
 
-        element(app, "upgrade").tap()
-        sleep(1)
-        capture(app, "7-upgraded")
+        element(app, "pause").tap()
+        XCTAssertTrue(element(app, "paused-banner").waitForExistence(timeout: 5), "Pausing says so over the map")
+        capture(app, "9-paused")
+        element(app, "pause").tap()
+        XCTAssertFalse(element(app, "paused-banner").exists, "Play carries on")
     }
 
-    /// The screens at the end of a level.
+    /// All 50 rounds played for real, then the end screen.
     func testEndScreens() {
-        let app = launch(["-demo", "-endScreen", "win"])
-        XCTAssertTrue(element(app, "end-screen").waitForExistence(timeout: 20), "The level ends with a result")
+        let app = launch(["-endScreen", "win"])
+        XCTAssertTrue(element(app, "end-screen").waitForExistence(timeout: 420), "The level ends with a result")
         sleep(1)
-        capture(app, "8-victory")
+        capture(app, "10-victory")
     }
 
     /// The open iPhone Duo's screen, drawn at its size on the Pro Max (the
@@ -86,18 +107,19 @@ final class WalkthroughUITests: XCTestCase {
 
         var app = launch(["-openDuoPreview"], landscape: true)
         XCTAssertTrue(element(app, "play-level").waitForExistence(timeout: 20))
-        capture(app, "9-open-duo-menu")
+        capture(app, "11-open-duo-menu")
         app.terminate()
 
         app = launch(["-openDuoPreview", "-demo", "-startWave", "3", "-warmup", "20", "-selectPosition", "3"], landscape: true)
         XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 20), "The open Duo puts the commands beside the map")
+        XCTAssertTrue(element(app, "upgrade-3a").waitForExistence(timeout: 10), "The level 3 choice shows with room to explain")
         sleep(2)
-        capture(app, "10-open-duo-battle")
+        capture(app, "12-open-duo-battle")
         app.terminate()
 
         app = launch(["-openDuoPreview", "-play", "-selectSlot", "0"], landscape: true)
         XCTAssertTrue(element(app, "build-menu").waitForExistence(timeout: 20))
-        capture(app, "11-open-duo-build")
+        capture(app, "13-open-duo-build")
     }
 }
 

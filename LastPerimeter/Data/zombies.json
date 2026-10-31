@@ -19,6 +19,76 @@
       "reward": 6,
       "breachDamage": 1,
       "drawScale": 1.6
+    },
+    {
+      "id": "crawler",
+      "name": "Crawler",
+      "manual": "Drags itself along the ground and is hard to spot: positions only see it at two thirds of their range. Snipers reach it first.",
+      "health": 70,
+      "speed": 0.32,
+      "reward": 6,
+      "breachDamage": 1,
+      "drawScale": 1.6,
+      "sightFactor": 0.66
+    },
+    {
+      "id": "screamer",
+      "name": "Screamer",
+      "manual": "Its shrieks drive the horde: zombies close to it on the road move a third faster. Kill it first, ideally with a sniper.",
+      "health": 60,
+      "speed": 0.7,
+      "reward": 8,
+      "breachDamage": 1,
+      "drawScale": 1.6,
+      "hurry": {
+        "radius": 2.0,
+        "factor": 1.33
+      }
+    },
+    {
+      "id": "bloater",
+      "name": "Bloater",
+      "manual": "Swollen and slow, with a lot of health. If it reaches the Command Post it bursts and does three times the damage.",
+      "health": 160,
+      "speed": 0.38,
+      "reward": 12,
+      "breachDamage": 3,
+      "drawScale": 1.5
+    },
+    {
+      "id": "armored",
+      "name": "Armored",
+      "manual": "Infected soldiers in body armor. Armor takes 6 off every hit, so rifles and light machine guns barely scratch them. Snipers and heavy guns punch through.",
+      "health": 140,
+      "speed": 0.55,
+      "reward": 14,
+      "breachDamage": 2,
+      "drawScale": 1.5,
+      "armor": 6
+    },
+    {
+      "id": "brute",
+      "name": "Brute",
+      "manual": "A huge, slow mutant that soaks up fire, with armor that takes 4 off every hit. Boss of every tenth round. Breaks through for 6 damage.",
+      "health": 900,
+      "speed": 0.3,
+      "reward": 60,
+      "breachDamage": 6,
+      "drawScale": 1.35,
+      "armor": 4,
+      "boss": true
+    },
+    {
+      "id": "behemoth",
+      "name": "Behemoth",
+      "manual": "The final boss. Enormous, armored (takes 10 off every hit) and almost unstoppable. If it reaches the Command Post, the line falls. Focus everything on it.",
+      "health": 3000,
+      "speed": 0.22,
+      "reward": 300,
+      "breachDamage": 20,
+      "drawScale": 1.2,
+      "armor": 10,
+      "boss": true
     }
   ]
 }

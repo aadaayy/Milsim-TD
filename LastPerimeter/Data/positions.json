@@ -6,8 +6,48 @@
       "role": "Cheap all-rounder",
       "manual": "A few riflemen with suppressed carbines. Cheap and quiet, so they don't draw the horde. Good against Walkers and Runners in small numbers.",
       "levels": [
-        { "sprite": "rifle_squad_1", "title": "Fire team", "cost": 60, "range": 2.6, "damage": 7, "fireInterval": 0.7, "noise": 10 },
-        { "sprite": "rifle_squad_2", "title": "Rifle squad", "cost": 70, "range": 2.8, "damage": 9, "fireInterval": 0.55, "noise": 12 }
+        {
+          "sprite": "rifle_squad_1",
+          "title": "Fire team",
+          "cost": 60,
+          "range": 2.6,
+          "damage": 7,
+          "fireInterval": 0.7,
+          "noise": 10
+        },
+        {
+          "sprite": "rifle_squad_2",
+          "title": "Rifle squad",
+          "cost": 70,
+          "range": 2.8,
+          "damage": 9,
+          "fireInterval": 0.55,
+          "noise": 12
+        }
+      ],
+      "specializations": [
+        {
+          "sprite": "rifle_squad_3a",
+          "title": "Spec ops",
+          "about": "Longer reach and faster, armor-piercing fire. Still quiet.",
+          "cost": 160,
+          "range": 3.4,
+          "damage": 14,
+          "fireInterval": 0.4,
+          "noise": 8,
+          "pierce": 3
+        },
+        {
+          "sprite": "rifle_squad_3b",
+          "title": "Grenadiers",
+          "about": "Grenade launchers: every shot hits everything close to the target.",
+          "cost": 170,
+          "range": 2.8,
+          "damage": 22,
+          "fireInterval": 1.0,
+          "noise": 35,
+          "splash": 0.9
+        }
       ]
     },
     {
@@ -16,8 +56,55 @@
       "role": "Crowd control",
       "manual": "A machine gun behind sandbags. Fires fast and slows the infantry-type zombies it hits. Loud: later, its noise will draw more of the horde.",
       "levels": [
-        { "sprite": "mg_nest_1", "title": "LMG team", "cost": 100, "range": 2.4, "damage": 3, "fireInterval": 0.14, "noise": 40, "slowFactor": 0.6, "slowSeconds": 0.4 },
-        { "sprite": "mg_nest_2", "title": "HMG nest", "cost": 90, "range": 2.6, "damage": 4, "fireInterval": 0.1, "noise": 45, "slowFactor": 0.5, "slowSeconds": 0.5 }
+        {
+          "sprite": "mg_nest_1",
+          "title": "LMG team",
+          "cost": 100,
+          "range": 2.4,
+          "damage": 3,
+          "fireInterval": 0.14,
+          "noise": 40,
+          "slowFactor": 0.6,
+          "slowSeconds": 0.4
+        },
+        {
+          "sprite": "mg_nest_2",
+          "title": "HMG nest",
+          "cost": 90,
+          "range": 2.6,
+          "damage": 4,
+          "fireInterval": 0.1,
+          "noise": 45,
+          "slowFactor": 0.5,
+          "slowSeconds": 0.5
+        }
+      ],
+      "specializations": [
+        {
+          "sprite": "mg_nest_3a",
+          "title": "Rotary gun",
+          "about": "A wall of fire that slows everything it touches.",
+          "cost": 200,
+          "range": 2.6,
+          "damage": 4,
+          "fireInterval": 0.05,
+          "noise": 55,
+          "slowFactor": 0.45,
+          "slowSeconds": 0.5
+        },
+        {
+          "sprite": "mg_nest_3b",
+          "title": "Twin HMG",
+          "about": "Two heavy guns whose rounds punch through armor.",
+          "cost": 220,
+          "range": 2.9,
+          "damage": 10,
+          "fireInterval": 0.1,
+          "noise": 55,
+          "pierce": 6,
+          "slowFactor": 0.6,
+          "slowSeconds": 0.4
+        }
       ]
     },
     {
@@ -26,8 +113,50 @@
       "role": "Single-target damage",
       "manual": "A sniper and a spotter. Long reach and heavy single shots, slow between them. Best for picking off dangerous zombies before they reach the line.",
       "levels": [
-        { "sprite": "sniper_1", "title": "Sniper team", "cost": 90, "range": 4.2, "damage": 40, "fireInterval": 2.0, "noise": 25 },
-        { "sprite": "sniper_2", "title": "Suppressed + rangefinder", "cost": 80, "range": 4.6, "damage": 70, "fireInterval": 1.8, "noise": 15 }
+        {
+          "sprite": "sniper_1",
+          "title": "Sniper team",
+          "cost": 90,
+          "range": 4.2,
+          "damage": 40,
+          "fireInterval": 2.0,
+          "noise": 25,
+          "pierce": 6
+        },
+        {
+          "sprite": "sniper_2",
+          "title": "Suppressed + rangefinder",
+          "cost": 80,
+          "range": 4.6,
+          "damage": 70,
+          "fireInterval": 1.8,
+          "noise": 15,
+          "pierce": 8
+        }
+      ],
+      "specializations": [
+        {
+          "sprite": "sniper_3a",
+          "title": "Anti-materiel",
+          "about": "A huge rifle that ignores armor. Built to drop Brutes and the Behemoth.",
+          "cost": 200,
+          "range": 4.8,
+          "damage": 260,
+          "fireInterval": 2.2,
+          "noise": 30,
+          "pierce": 20
+        },
+        {
+          "sprite": "sniper_3b",
+          "title": "Overwatch tower",
+          "about": "Sees much further and fires faster, covering most of the road.",
+          "cost": 210,
+          "range": 5.6,
+          "damage": 80,
+          "fireInterval": 0.9,
+          "noise": 20,
+          "pierce": 8
+        }
       ]
     }
   ]
