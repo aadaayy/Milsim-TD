@@ -155,6 +155,9 @@ jobs:
           for test in manifest:
               for a in test.get("attachments", []):
                   step = a["suggestedHumanReadableName"].split("_0_")[0]
+                  # Only the walk-through's own pictures ("1-menu" and so on)
+                  if not step[:1].isdigit() or not a["exportedFileName"].endswith(".png"):
+                      continue
                   step = "".join(c for c in step if c not in '"<>|*?:\\/\r\n')
                   shutil.copy(f"{out}/{a['exportedFileName']}", f"publish/{phone} - {step}.png")
           PY

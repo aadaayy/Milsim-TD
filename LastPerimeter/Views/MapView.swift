@@ -15,11 +15,14 @@ struct MapView: View {
                                  y: (geometry.size.height - scene.size.height * scale) / 2)
             ZStack(alignment: .topLeading) {
                 SpriteView(scene: scene, preferredFramesPerSecond: 60, options: [.ignoresSiblingOrder])
+                    .frame(width: scene.size.width * scale, height: scene.size.height * scale)
+                    .offset(x: origin.x, y: origin.y)
                     .accessibilityIdentifier("battlefield")
                 slotMarkers(scale: scale, origin: origin)
             }
+            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
         }
-        .background(Color(Theme.mapEdgeUI))
+        .background(Theme.mapSurround)
     }
 
     private func slotMarkers(scale: CGFloat, origin: CGPoint) -> some View {

@@ -49,6 +49,7 @@ struct CommandPostHealth: View {
             }
             .frame(width: wide ? 120 : 54, height: 8)
             Text("\(session.commandPostHealth)").font(.readout(13)).foregroundStyle(Theme.text).monospacedDigit()
+                .fixedSize()
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Command Post health \(session.commandPostHealth) of \(total)")
@@ -106,6 +107,11 @@ struct ControlBar: View {
             .buttonStyle(PrimaryButtonStyle(color: Theme.olive))
             .frame(maxWidth: .infinity)
             .accessibilityIdentifier("start-wave")
+        case .won, .lost:
+            Text(session.phase == .lost ? "OVERRUN" : "LINE HELD").font(.stencil(15)).foregroundStyle(Theme.text)
+                .frame(maxWidth: .infinity, minHeight: 46)
+                .panel()
+                .accessibilityIdentifier("wave-status")
         default:
             HStack(spacing: 6) {
                 Circle().fill(Theme.alert).frame(width: 8, height: 8)
@@ -161,6 +167,7 @@ struct BuildMenu: View {
                 }
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("build-menu")
     }
 
@@ -290,7 +297,7 @@ struct PositionCard: View {
                     }
                     .frame(maxWidth: roomy ? .infinity : nil)
                 }
-                .buttonStyle(PrimaryButtonStyle())
+                .buttonStyle(PrimaryButtonStyle(height: roomy ? 46 : 36))
                 .disabled(!session.game.canUpgrade(position.id))
                 .opacity(session.game.canUpgrade(position.id) ? 1 : 0.45)
                 .accessibilityLabel("Upgrade for \(next.cost) supply")
@@ -303,7 +310,7 @@ struct PositionCard: View {
                 }
                 .frame(maxWidth: roomy ? .infinity : nil)
             }
-            .buttonStyle(IconButtonStyle())
+            .buttonStyle(IconButtonStyle(height: roomy ? 46 : 36))
             .accessibilityLabel("Sell for \(session.game.refund(for: position.id)) supply")
             .accessibilityIdentifier("sell")
         }
@@ -375,6 +382,7 @@ struct WaveIntel: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("wave-intel")
     }
 }

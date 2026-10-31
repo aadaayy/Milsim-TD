@@ -21,7 +21,7 @@ struct GameScreen: View {
                         TopStrip(session: session, onMenu: onMenu)
                         MapView(session: session)
                         ContextPanel(session: session)
-                            .frame(height: 112, alignment: .top)
+                            .frame(height: 118, alignment: .top)
                             .padding(.top, 6)
                         ControlBar(session: session)
                     }
@@ -73,6 +73,7 @@ struct CommandPanel: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .background(Theme.panel)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("command-panel")
     }
 }
@@ -163,6 +164,7 @@ struct EndOverlay: View {
             .panel(raised: true)
             .padding(20)
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("end-screen")
     }
 

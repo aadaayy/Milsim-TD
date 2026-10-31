@@ -15,6 +15,8 @@ enum Theme {
     static let alert = Color(red: 0.84, green: 0.36, blue: 0.25)
     static let good = Color(red: 0.56, green: 0.74, blue: 0.36)
 
+    /// Around the map where the screen is wider than the map: dark scrub.
+    static let mapSurround = Color(red: 0.13, green: 0.15, blue: 0.10)
     static let mapEdgeUI = UIColor(red: 0.08, green: 0.09, blue: 0.06, alpha: 1)
     static let sandUI = UIColor(red: 0.86, green: 0.78, blue: 0.58, alpha: 1)
     static let healthUI = UIColor(red: 0.86, green: 0.30, blue: 0.22, alpha: 1)
@@ -48,24 +50,26 @@ extension View {
 /// The sand-colored main action button.
 struct PrimaryButtonStyle: ButtonStyle {
     var color = Theme.sand
+    var height: CGFloat = 46
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.stencil(17))
             .tracking(1)
             .foregroundStyle(Theme.background)
             .padding(.horizontal, 16)
-            .frame(minHeight: 46)
+            .frame(minHeight: height)
             .background(color.opacity(configuration.isPressed ? 0.75 : 1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
 /// A darker square button for pause, speed and menus.
 struct IconButtonStyle: ButtonStyle {
+    var height: CGFloat = 46
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.stencil(16))
             .foregroundStyle(Theme.text)
-            .frame(minWidth: 46, minHeight: 46)
+            .frame(minWidth: height, minHeight: height)
             .background(Theme.panelRaised.opacity(configuration.isPressed ? 0.6 : 1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Theme.edge.opacity(0.7), lineWidth: 1))
     }

@@ -168,7 +168,16 @@ final class GameSession {
         }
         if let speed = value("-speed").flatMap(Int.init) { self.speed = min(max(speed, 1), 3) }
         if let end = value("-endScreen") {
-            game.forceEnd(won: end == "win")
+            // Play the level out for real (no drawing), so the end screen's
+            // numbers are true; force the asked-for ending only if it differs.
+            var seconds = 0.0
+            while !game.isOver && seconds < 1800 {
+                if case .build = game.phase { _ = game.startNextWave() }
+                _ = game.tick(1.0 / 30)
+                seconds += 1.0 / 30
+            }
+            let won: Bool = { if case .won = game.phase { return true }; return false }()
+            if !game.isOver || won != (end == "win") { game.forceEnd(won: end == "win") }
         }
         refresh()
     }
