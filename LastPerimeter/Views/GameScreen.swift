@@ -1,9 +1,12 @@
 import SwiftUI
 
-/// A level being played. Tall screens (any iPhone held upright, and the
-/// closed iPhone Duo) get the map with the controls under it, all within
-/// thumb reach. Wide screens (the open iPhone Duo) put the map on one half
-/// and the command panel on the other.
+/// A level being played, laid out for the shape of the screen:
+/// - tall and narrow (a regular iPhone or Pro Max, upright): the map with
+///   the controls under it, all within thumb reach
+/// - upright but stubbier (the folded iPhone Duo): the map on the left and
+///   a side bar of controls on the right, using the width beside the map
+/// - wide (the open iPhone Duo): the map on one half and the full command
+///   panel, with room to explain everything, on the other
 struct GameScreen: View {
     let session: GameSession
     let onRetry: () -> Void
@@ -12,10 +15,18 @@ struct GameScreen: View {
     var body: some View {
         GeometryReader { geometry in
             let wide = geometry.size.width > geometry.size.height * 1.05
+            let sideBar = !wide && geometry.size.height < geometry.size.width * 1.75
             ZStack {
                 Theme.background.ignoresSafeArea()
                 if wide {
                     WideGameLayout(map: mapPane, panel: CommandPanel(session: session))
+                } else if sideBar {
+                    HStack(spacing: 0) {
+                        mapPane
+                        Rectangle().fill(Theme.edge).frame(width: 1).ignoresSafeArea()
+                        SideBar(session: session)
+                            .frame(width: min(240, geometry.size.width * 0.36))
+                    }
                 } else {
                     VStack(spacing: 0) {
                         TopStrip(session: session, onMenu: onMenu)
@@ -75,6 +86,36 @@ struct CommandPanel: View {
         .background(Theme.panel)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("command-panel")
+    }
+}
+
+/// The folded Duo's right-hand column: the numbers at the top, the build
+/// menu or a position's card in the middle, and the wave, pause and speed
+/// buttons at the bottom where the thumb rests.
+struct SideBar: View {
+    let session: GameSession
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("COMMAND").font(.stencil(18)).foregroundStyle(Theme.text)
+                Spacer()
+                Text("\(session.kills) KILLS").font(.stencil(12)).foregroundStyle(Theme.dim)
+            }
+            .padding(.horizontal, 10)
+            Divider().overlay(Theme.edge)
+            ScrollView {
+                ContextPanel(session: session, column: true)
+                    .padding(.top, 2)
+            }
+            .scrollIndicators(.hidden)
+            Divider().overlay(Theme.edge)
+            ControlBar(session: session, column: true)
+        }
+        .padding(.top, 12)
+        .background(Theme.panel)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("side-bar")
     }
 }
 

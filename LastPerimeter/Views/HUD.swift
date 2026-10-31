@@ -60,32 +60,55 @@ struct CommandPostHealth: View {
 /// Supply, the wave button, pause and speed: everything a thumb needs, along the bottom.
 struct ControlBar: View {
     let session: GameSession
+    /// The folded Duo's side bar: the wave button on its own row, the rest under it.
+    var column = false
 
     var body: some View {
-        HStack(spacing: 8) {
-            SupplyLabel(amount: session.supply, size: 18)
-                .padding(.horizontal, 10)
-                .frame(minHeight: 46)
-                .panel(raised: true)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Supply \(session.supply)")
-                .accessibilityIdentifier("supply")
-            waveButton
-            Button(action: session.togglePause) {
-                Image(systemName: session.isPaused ? "play.fill" : "pause.fill")
+        if column {
+            VStack(spacing: 8) {
+                waveButton
+                HStack(spacing: 8) {
+                    supply.frame(maxWidth: .infinity)
+                    pauseAndSpeed
+                }
             }
-            .buttonStyle(IconButtonStyle())
-            .accessibilityLabel(session.isPaused ? "Resume" : "Pause")
-            .accessibilityIdentifier("pause")
-            Button(action: session.cycleSpeed) {
-                Text("\(session.speed)×").font(.readout(16))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+        } else {
+            HStack(spacing: 8) {
+                supply
+                waveButton
+                pauseAndSpeed
             }
-            .buttonStyle(IconButtonStyle())
-            .accessibilityLabel("Speed \(session.speed) times")
-            .accessibilityIdentifier("speed")
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+    }
+
+    private var supply: some View {
+        SupplyLabel(amount: session.supply, size: 18)
+            .padding(.horizontal, 10)
+            .frame(minHeight: 46)
+            .panel(raised: true)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Supply \(session.supply)")
+            .accessibilityIdentifier("supply")
+    }
+
+    @ViewBuilder
+    private var pauseAndSpeed: some View {
+        Button(action: session.togglePause) {
+            Image(systemName: session.isPaused ? "play.fill" : "pause.fill")
+        }
+        .buttonStyle(IconButtonStyle())
+        .accessibilityLabel(session.isPaused ? "Resume" : "Pause")
+        .accessibilityIdentifier("pause")
+        Button(action: session.cycleSpeed) {
+            Text("\(session.speed)×").font(.readout(16))
+        }
+        .buttonStyle(IconButtonStyle())
+        .accessibilityLabel("Speed \(session.speed) times")
+        .accessibilityIdentifier("speed")
     }
 
     @ViewBuilder
@@ -129,16 +152,18 @@ struct ContextPanel: View {
     let session: GameSession
     /// The open Duo's side panel has room for descriptions.
     var roomy = false
+    /// The folded Duo's narrow side bar: things stack instead of sitting side by side.
+    var column = false
 
     var body: some View {
         Group {
             switch session.selection {
             case .slot(let slot):
-                BuildMenu(session: session, slot: slot, roomy: roomy)
+                BuildMenu(session: session, slot: slot, roomy: roomy, column: column)
             case .position(let id):
-                PositionCard(session: session, id: id, roomy: roomy)
+                PositionCard(session: session, id: id, roomy: roomy, column: column)
             case .none:
-                WaveIntel(session: session, roomy: roomy)
+                WaveIntel(session: session, roomy: roomy, column: column)
             }
         }
         .padding(.horizontal, 10)
@@ -151,6 +176,7 @@ struct BuildMenu: View {
     let session: GameSession
     let slot: Int
     var roomy = false
+    var column = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -160,7 +186,7 @@ struct BuildMenu: View {
                 Button("Cancel") { session.selection = .none }
                     .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.sand)
             }
-            let layout = roomy ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
+            let layout = roomy || column ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
             layout {
                 ForEach(session.catalog.positions) { type in
                     option(type)
@@ -193,6 +219,21 @@ struct BuildMenu: View {
                 .padding(8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .panel(raised: true)
+            } else if column {
+                HStack(spacing: 8) {
+                    Portrait(name: first.sprite, size: 48)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(type.name.uppercased()).font(.stencil(14)).foregroundStyle(Theme.text)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        Text(type.role).font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.sand)
+                            .lineLimit(1).minimumScaleFactor(0.8)
+                        SupplyLabel(amount: first.cost, size: 13)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .panel(raised: true)
             } else {
                 VStack(spacing: 2) {
                     Portrait(name: first.sprite, size: 44)
@@ -218,6 +259,7 @@ struct PositionCard: View {
     let session: GameSession
     let id: Int
     var roomy = false
+    var column = false
 
     var body: some View {
         let _ = session.positionsVersion
@@ -234,16 +276,18 @@ struct PositionCard: View {
                             Text("Level \(position.level + 1): \(level.title)")
                                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                         }
-                        StatRow(level: level, kills: position.kills)
+                        if !column { StatRow(level: level, kills: position.kills) }
                     }
                     Spacer(minLength: 0)
-                    if !roomy { actions(position) }
+                    if !roomy && !column { actions(position) }
                 }
+                if column { StatRow(level: level, kills: position.kills, stacked: true) }
                 if roomy {
                     Text(type.manual).font(.system(size: 13)).foregroundStyle(Theme.dim)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                priorityPicker(position)
+                if column { columnPriorityPicker(position) } else { priorityPicker(position) }
+                if column { actions(position) }
                 if roomy {
                     if let next = session.game.nextLevelSpec(of: position) {
                         HStack(spacing: 8) {
@@ -259,6 +303,32 @@ struct PositionCard: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("position-card")
+        }
+    }
+
+    /// The three targeting choices as small tiles, for the narrow side bar.
+    private func columnPriorityPicker(_ position: Position) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("TARGET").font(.stencil(11)).foregroundStyle(Theme.dim)
+            HStack(spacing: 6) {
+                ForEach(TargetPriority.allCases, id: \.self) { priority in
+                    let chosen = position.priority == priority
+                    Button {
+                        session.setPriority(priority, for: position.id)
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image("badge_priority_\(priority.rawValue)").resizable().frame(width: 16, height: 16)
+                            Text(priority.label).font(.system(size: 11, weight: .semibold))
+                                .lineLimit(1).minimumScaleFactor(0.8)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 42)
+                        .foregroundStyle(chosen ? Theme.background : Theme.text)
+                        .background(chosen ? Theme.sand : Theme.panelRaised, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("priority-\(priority.rawValue)")
+                }
+            }
         }
     }
 
@@ -287,7 +357,8 @@ struct PositionCard: View {
     @ViewBuilder
     private func actions(_ position: Position) -> some View {
         let next = session.game.nextLevelSpec(of: position)
-        let layout = roomy ? AnyLayout(HStackLayout(spacing: 8)) : AnyLayout(VStackLayout(spacing: 6))
+        let wide = roomy || column
+        let layout = wide ? AnyLayout(HStackLayout(spacing: 8)) : AnyLayout(VStackLayout(spacing: 6))
         layout {
             if let next {
                 Button { session.upgrade(position.id) } label: {
@@ -295,9 +366,9 @@ struct PositionCard: View {
                         Image("badge_upgrade").resizable().frame(width: 16, height: 16)
                         Text("\(next.cost)").font(.readout(14))
                     }
-                    .frame(maxWidth: roomy ? .infinity : nil)
+                    .frame(maxWidth: wide ? .infinity : nil)
                 }
-                .buttonStyle(PrimaryButtonStyle(height: roomy ? 46 : 36))
+                .buttonStyle(PrimaryButtonStyle(height: wide ? 46 : 36))
                 .disabled(!session.game.canUpgrade(position.id))
                 .opacity(session.game.canUpgrade(position.id) ? 1 : 0.45)
                 .accessibilityLabel("Upgrade for \(next.cost) supply")
@@ -308,9 +379,9 @@ struct PositionCard: View {
                     Image("badge_sell").resizable().frame(width: 16, height: 16)
                     Text("+\(session.game.refund(for: position.id))").font(.readout(14))
                 }
-                .frame(maxWidth: roomy ? .infinity : nil)
+                .frame(maxWidth: wide ? .infinity : nil)
             }
-            .buttonStyle(IconButtonStyle(height: roomy ? 46 : 36))
+            .buttonStyle(IconButtonStyle(height: wide ? 46 : 36))
             .accessibilityLabel("Sell for \(session.game.refund(for: position.id)) supply")
             .accessibilityIdentifier("sell")
         }
@@ -321,13 +392,28 @@ struct PositionCard: View {
 struct StatRow: View {
     let level: PositionLevel
     var kills: Int?
+    /// Two short rows instead of one long one.
+    var stacked = false
 
     var body: some View {
-        HStack(spacing: 10) {
-            stat("RNG", String(format: "%.1f", level.range))
-            stat("DPS", String(format: "%.0f", level.damage / level.fireInterval))
-            stat("NOISE", "\(level.noise)")
-            if let kills { stat("KILLS", "\(kills)") }
+        if stacked {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 10) {
+                    stat("RNG", String(format: "%.1f", level.range))
+                    stat("DPS", String(format: "%.0f", level.damage / level.fireInterval))
+                }
+                HStack(spacing: 10) {
+                    stat("NOISE", "\(level.noise)")
+                    if let kills { stat("KILLS", "\(kills)") }
+                }
+            }
+        } else {
+            HStack(spacing: 10) {
+                stat("RNG", String(format: "%.1f", level.range))
+                stat("DPS", String(format: "%.0f", level.damage / level.fireInterval))
+                stat("NOISE", "\(level.noise)")
+                if let kills { stat("KILLS", "\(kills)") }
+            }
         }
     }
 
@@ -343,6 +429,7 @@ struct StatRow: View {
 struct WaveIntel: View {
     let session: GameSession
     var roomy = false
+    var column = false
 
     var body: some View {
         let waveIndex: Int = {
@@ -357,7 +444,7 @@ struct WaveIntel: View {
                     Spacer()
                     Text("\(wave.total) hostiles").font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                 }
-                let layout = roomy ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
+                let layout = roomy || column ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
                 layout {
                     ForEach(wave.counts.map { $0.zombie }, id: \.self) { zombieID in
                         let count = wave.counts.first(where: { $0.zombie == zombieID })?.count ?? 0

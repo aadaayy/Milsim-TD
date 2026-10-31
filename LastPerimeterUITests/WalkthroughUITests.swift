@@ -37,6 +37,9 @@ final class WalkthroughUITests: XCTestCase {
         let pad = element(app, "slot-3")
         XCTAssertTrue(pad.waitForExistence(timeout: 10), "The battlefield shows its build pads")
         XCTAssertTrue(element(app, "start-wave").exists, "The first wave waits for the player")
+        if UIDeviceName.current.contains("Duo") {
+            XCTAssertTrue(element(app, "side-bar").exists, "The folded Duo puts the controls in a side bar beside the map")
+        }
         capture(app, "2-battlefield")
 
         pad.tap()

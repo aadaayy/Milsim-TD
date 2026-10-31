@@ -9,8 +9,8 @@ The app plays chapter 1, level 1 ("Crossroads"): build rifle squads, machine gun
 It fits four phones:
 
 - a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top, controls under it for one thumb
-- the iPhone Duo folded, the same as a regular iPhone
-- the iPhone Duo open: battlefield on one half, the command panel (build menu, position card, wave intel) on the other
+- the iPhone Duo folded: battlefield on the left, a side bar on the right with the build menu or position card and the wave, pause and speed buttons
+- the iPhone Duo open: battlefield on one half, the full command panel (build menu with descriptions, position card with its next upgrade, wave intel) on the other
 
 ```
 LastPerimeter/
