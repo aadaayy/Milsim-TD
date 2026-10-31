@@ -6,7 +6,7 @@ import PackageDescription
 
 let package = Package(
     name: "PerimeterCore",
-    platforms: [.iOS(.v18), .macOS(.v14)],
+    platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
         .library(name: "PerimeterCore", targets: ["PerimeterCore"]),
     ],
