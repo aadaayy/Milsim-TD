@@ -130,11 +130,24 @@ struct ControlBar: View {
                 .accessibilityIdentifier("start-wave")
         case .pause:
             Button(action: session.startNextWave) {
-                HStack(spacing: 6) {
-                    Text("ROUND \(session.wavesStarted + 1)")
-                    if session.game.nextWave?.boss == true { Text("BOSS") }
-                    Text("IN \(session.breakSeconds)").font(.readout(14))
-                    Image(systemName: "forward.fill").font(.system(size: 12))
+                let boss = session.game.nextWave?.boss == true
+                if column {
+                    // The side bar is narrow: the round on one line, the countdown under it.
+                    VStack(spacing: 1) {
+                        Text(boss ? "BOSS \(session.wavesStarted + 1)" : "ROUND \(session.wavesStarted + 1)")
+                        HStack(spacing: 4) {
+                            Text("IN \(session.breakSeconds)").font(.readout(12))
+                            Image(systemName: "forward.fill").font(.system(size: 10))
+                        }
+                    }
+                    .padding(.vertical, 4)
+                } else {
+                    HStack(spacing: 6) {
+                        Text("ROUND \(session.wavesStarted + 1)")
+                        if boss { Text("BOSS") }
+                        Text("IN \(session.breakSeconds)").font(.readout(14))
+                        Image(systemName: "forward.fill").font(.system(size: 12))
+                    }
                 }
             }
             .buttonStyle(PrimaryButtonStyle(color: Theme.olive))
@@ -429,10 +442,13 @@ struct PositionCard: View {
                     Image("badge_level_\(name.lowercased())").resizable().frame(width: 16, height: 16)
                     Text(option.title.uppercased()).font(.stencil(13))
                         .lineLimit(1).minimumScaleFactor(0.6)
-                    Spacer(minLength: 2)
-                    Image("badge_upgrade").resizable().frame(width: 14, height: 14)
-                    Text("\(option.cost)").font(.readout(13))
+                    if !column {
+                        Spacer(minLength: 2)
+                        cost(option)
+                    }
                 }
+                // In the narrow side bar the price gets its own line, so the name fits.
+                if column { cost(option) }
                 if roomy || column, let about = option.about {
                     Text(about).font(.system(size: 11)).tracking(0)
                         .multilineTextAlignment(.leading)
@@ -447,6 +463,13 @@ struct PositionCard: View {
         .opacity(affordable ? 1 : 0.45)
         .accessibilityLabel("Level 3\(branch == 0 ? "A" : "B"), \(option.title), for \(option.cost) supply")
         .accessibilityIdentifier("upgrade-\(name.lowercased())")
+    }
+
+    private func cost(_ option: PositionLevel) -> some View {
+        HStack(spacing: 4) {
+            Image("badge_upgrade").resizable().frame(width: 14, height: 14)
+            Text("\(option.cost)").font(.readout(13))
+        }
     }
 
     @ViewBuilder
