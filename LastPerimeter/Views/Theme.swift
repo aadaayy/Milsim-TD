@@ -83,6 +83,7 @@ struct SupplyLabel: View {
         HStack(spacing: 4) {
             Image("badge_supply").resizable().scaledToFit().frame(width: size + 4, height: size + 4)
             Text("\(amount)").font(.readout(size)).foregroundStyle(Theme.sand).monospacedDigit()
+                .fixedSize()
         }
     }
 }
