@@ -1,0 +1,24 @@
+{
+  "zombies": [
+    {
+      "id": "walker",
+      "name": "Walker",
+      "manual": "Slow and weak, but comes in big numbers. Rifle squads and machine guns handle them.",
+      "health": 45,
+      "speed": 0.45,
+      "reward": 4,
+      "breachDamage": 1,
+      "drawScale": 1.6
+    },
+    {
+      "id": "runner",
+      "name": "Runner",
+      "manual": "Fast and weak. Punishes gaps in your coverage. Machine guns slow them down.",
+      "health": 28,
+      "speed": 1.15,
+      "reward": 6,
+      "breachDamage": 1,
+      "drawScale": 1.6
+    }
+  ]
+}

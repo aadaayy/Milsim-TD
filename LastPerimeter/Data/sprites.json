@@ -1,0 +1,338 @@
+{
+  "note": "Made by Tools/make_sprites.py. Sizes are real meters; facing n = up the screen.",
+  "positions": {
+    "rifle_squad_1": {
+      "atlas": "rifle_squad_1",
+      "label": "Level 1: Fire team",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        3.1719,
+        3.25
+      ],
+      "cell_m": [
+        2.7578,
+        3.0234
+      ],
+      "offset_m": [
+        0.1836,
+        0.0977
+      ]
+    },
+    "rifle_squad_2": {
+      "atlas": "rifle_squad_2",
+      "label": "Level 2: Rifle squad",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        3.6875,
+        3.6094
+      ],
+      "cell_m": [
+        3.2188,
+        3.4141
+      ],
+      "offset_m": [
+        0.1875,
+        0.0977
+      ]
+    },
+    "mg_nest_1": {
+      "atlas": "mg_nest_1",
+      "label": "Level 1: LMG team",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        3.5938,
+        3.0625
+      ],
+      "cell_m": [
+        2.6328,
+        2.8047
+      ],
+      "offset_m": [
+        0.1523,
+        0.0977
+      ]
+    },
+    "mg_nest_2": {
+      "atlas": "mg_nest_2",
+      "label": "Level 2: HMG nest",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        4.4219,
+        4.1875
+      ],
+      "cell_m": [
+        4.2109,
+        4.0781
+      ],
+      "offset_m": [
+        0.1055,
+        0.0547
+      ]
+    },
+    "sniper_1": {
+      "atlas": "sniper_1",
+      "label": "Level 1: Sniper team",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        3.8438,
+        3.3594
+      ],
+      "cell_m": [
+        3.4766,
+        3.0469
+      ],
+      "offset_m": [
+        -0.0039,
+        -0.0391
+      ]
+    },
+    "sniper_2": {
+      "atlas": "sniper_2",
+      "label": "Level 2: Suppressed + rangefinder",
+      "frames": [
+        "idle",
+        "fire1",
+        "fire2"
+      ],
+      "dirs": [
+        "n",
+        "nw",
+        "w",
+        "sw",
+        "s",
+        "se",
+        "e",
+        "ne"
+      ],
+      "base_m": [
+        4.1875,
+        3.7812
+      ],
+      "cell_m": [
+        3.5234,
+        3.1719
+      ],
+      "offset_m": [
+        0.0117,
+        0.0078
+      ]
+    }
+  },
+  "zombies": {
+    "walker": {
+      "atlas": "walker",
+      "label": "Walker",
+      "cell_m": [
+        2.7656,
+        2.9688
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 8,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    },
+    "runner": {
+      "atlas": "runner",
+      "label": "Runner",
+      "cell_m": [
+        2.8594,
+        3.0625
+      ],
+      "anims": {
+        "walk": {
+          "frames": 8,
+          "fps": 12,
+          "dirs": [
+            "n",
+            "nw",
+            "w",
+            "sw",
+            "s",
+            "se",
+            "e",
+            "ne"
+          ]
+        },
+        "death": {
+          "frames": 6,
+          "fps": 10,
+          "dirs": [
+            "n",
+            "w",
+            "s",
+            "e"
+          ]
+        }
+      }
+    }
+  },
+  "structures": {
+    "command_post": {
+      "atlas": "command_post",
+      "label": "intact, damaged, destroyed",
+      "frames": [
+        "intact",
+        "damaged",
+        "destroyed"
+      ],
+      "dirs": [
+        "n"
+      ],
+      "base_m": [
+        6.9062,
+        8.7188
+      ],
+      "cell_m": [
+        6.8203,
+        6.7812
+      ],
+      "offset_m": [
+        -0.043,
+        0.9688
+      ]
+    }
+  },
+  "effects": {
+    "muzzle_flash": {
+      "frames": 3,
+      "fps": 24,
+      "loop": false,
+      "cell_m": [
+        0.75,
+        0.75
+      ]
+    },
+    "tracer": {
+      "frames": 1,
+      "fps": 0,
+      "loop": false,
+      "cell_m": [
+        0.125,
+        1.25
+      ]
+    },
+    "hit_puff": {
+      "frames": 5,
+      "fps": 20,
+      "loop": false,
+      "cell_m": [
+        0.75,
+        0.75
+      ]
+    },
+    "smoke_puff": {
+      "frames": 8,
+      "fps": 12,
+      "loop": false,
+      "cell_m": [
+        1.5,
+        1.5
+      ]
+    },
+    "explosion_small": {
+      "frames": 10,
+      "fps": 16,
+      "loop": false,
+      "cell_m": [
+        2.5,
+        2.5
+      ]
+    }
+  },
+  "terrain": {
+    "tree_count": 4,
+    "dirt_count": 3
+  }
+}

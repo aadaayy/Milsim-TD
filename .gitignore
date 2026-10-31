@@ -25,3 +25,10 @@ xcuserdata/
 # 3D exports stay in the project files, not the repo
 *.glb
 *.fbx
+
+# Swift package and test output
+.build/
+.swiftpm/
+*.xcresult
+/screenshots/
+/publish/

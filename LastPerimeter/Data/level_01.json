@@ -1,0 +1,150 @@
+{
+  "id": "level_01",
+  "name": "Crossroads",
+  "chapter": 1,
+  "place": "Outbreak",
+  "briefing": "The outbreak has reached the edge of town. Hold the crossroads: build positions on the cleared pads, then send the first wave when you're ready.",
+  "cols": 9,
+  "rows": 15,
+  "tileMeters": 2.4,
+  "tiles": [
+    "FF..R..FF",
+    "F...R.S.F",
+    ".RRRR....",
+    ".R.S...T.",
+    "SR.......",
+    ".R.FF.S..",
+    ".RRRRRRR.",
+    "F..S...R.",
+    "H......RS",
+    "..S.RRRR.",
+    ".F..R.S.F",
+    "..S.R.S..",
+    "FF.CCC.FF",
+    "F..CCC..F",
+    "FF.CCC.TF"
+  ],
+  "path": [
+    [
+      4,
+      -1
+    ],
+    [
+      4,
+      2
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      7,
+      6
+    ],
+    [
+      7,
+      9
+    ],
+    [
+      4,
+      9
+    ],
+    [
+      4,
+      12
+    ]
+  ],
+  "commandPost": [
+    4.5,
+    13.3
+  ],
+  "startSupply": 150,
+  "commandPostHealth": 15,
+  "breakSeconds": 12,
+  "bonusObjective": "Don't let a single zombie reach the Command Post",
+  "waves": [
+    {
+      "bonus": 30,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 8,
+          "interval": 1.6,
+          "delay": 0
+        }
+      ]
+    },
+    {
+      "bonus": 40,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 16,
+          "interval": 1.0,
+          "delay": 0
+        }
+      ]
+    },
+    {
+      "bonus": 50,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 14,
+          "interval": 1.0,
+          "delay": 0
+        },
+        {
+          "zombie": "runner",
+          "count": 8,
+          "interval": 1.3,
+          "delay": 5
+        }
+      ]
+    },
+    {
+      "bonus": 60,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 24,
+          "interval": 0.7,
+          "delay": 0
+        },
+        {
+          "zombie": "runner",
+          "count": 12,
+          "interval": 1.0,
+          "delay": 4
+        }
+      ]
+    },
+    {
+      "bonus": 80,
+      "groups": [
+        {
+          "zombie": "walker",
+          "count": 34,
+          "interval": 0.5,
+          "delay": 0
+        },
+        {
+          "zombie": "runner",
+          "count": 14,
+          "interval": 0.9,
+          "delay": 3
+        },
+        {
+          "zombie": "runner",
+          "count": 10,
+          "interval": 0.4,
+          "delay": 18
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+# Automatic checks.
+#  1. Logic tests: game rules, level data and balance, on Linux (cheap and fast).
+#  2. App: builds the iPhone app once on a Mac, then plays through it on an
+#     iPhone Pro Max, a regular iPhone and an iPhone Duo simulator, one after
+#     the other, saving screenshots of each step.
+#  3. Publish: puts the newest screenshots on the screenshots branch.
+# Mac minutes are scarce, so: the Mac job waits for the logic tests, notes and
+# art-only changes don't run it, a newer push cancels an older run, and the
+# checkout leaves out the big source art (assets/), which the app doesn't use.
+name: Checks
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths-ignore: ['**.md', 'assets/**', 'Tools/**', 'scripts/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  logic:
+    name: Logic tests
+    runs-on: ubuntu-latest
+    container: swift:6.1
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            LastPerimeter/Core
+            LastPerimeter/Data
+            Tests
+      - name: Run logic tests
+        run: swift test
+
+  app:
+    name: App on iPhone Pro Max, iPhone and iPhone Duo
+    needs: logic
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            LastPerimeter
+            LastPerimeterUITests
+            LastPerimeter.xcodeproj
+
+      - name: Pick simulators
+        id: pick
+        run: |
+          sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)
+          # ArrangementView needs the iOS 27.1 SDK; older Xcode builds the plain side-by-side layout instead.
+          flags=$(python3 -c "v=tuple(int(x) for x in '$sdk'.split('.')[:2]); print('' if v >= (27, 1) else 'NO_DUO_SDK')")
+          devices=$(xcrun simctl list devices available)
+          promax=$(echo "$devices" | grep -oE "iPhone [0-9]+ Pro Max" | sort -u | tail -1)
+          regular=$(echo "$devices" | grep -oE "iPhone [0-9]+ \(" | sed 's/ ($//' | sort -u | tail -1)
+          duo=$(echo "$devices" | grep -oE "iPhone Duo[^(]*" | sed 's/ *$//' | sort -u | head -1)
+          echo "::notice title=Tools::$(xcodebuild -version | tr '\n' ' ')| iOS SDK $sdk | $promax | $regular | ${duo:-no Duo simulator}"
+          echo "flags=$flags" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$promax" "$regular" "$duo" | sed '/^$/d' > "$RUNNER_TEMP/phones.txt"
+
+      - name: Build the app and the walk-through
+        run: |
+          xcodebuild build-for-testing \
+            -project LastPerimeter.xcodeproj \
+            -scheme LastPerimeter \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/Build.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet \
+            "SWIFT_ACTIVE_COMPILATION_CONDITIONS=\$(inherited) ${{ steps.pick.outputs.flags }}"
+
+      - name: Play through on each phone
+        run: |
+          status=0
+          while IFS= read -r phone; do
+            echo "::group::$phone"
+            udid=$(python3 - "$phone" <<'PY'
+          import json, subprocess, sys
+          listing = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "available", "-j"]))
+          udid = None
+          for runtime, devices in sorted(listing["devices"].items()):
+              for d in devices:
+                  if d["name"] == sys.argv[1]:
+                      udid = d["udid"]  # newest runtime wins
+          print(udid)
+          PY
+            )
+            # Booting while the tests start can time out the test runner, so boot first.
+            xcrun simctl boot "$udid" || true
+            xcrun simctl bootstatus "$udid" -b
+            xcodebuild test-without-building \
+              -project LastPerimeter.xcodeproj \
+              -scheme LastPerimeter \
+              -destination "platform=iOS Simulator,id=$udid" \
+              -derivedDataPath build/DerivedData \
+              -resultBundlePath "build/$phone.xcresult" \
+              -quiet || status=1
+            xcrun simctl shutdown "$udid" || true
+            echo "::endgroup::"
+          done < "$RUNNER_TEMP/phones.txt"
+          exit $status
+
+      - name: Report build errors and test failures
+        if: failure()
+        run: |
+          shopt -s nullglob
+          for bundle in build/*.xcresult; do
+            xcrun xcresulttool get build-results --path "$bundle" > "$bundle.build.json" 2>/dev/null || true
+            xcrun xcresulttool get test-results summary --path "$bundle" > "$bundle.tests.json" 2>/dev/null || true
+          done
+          python3 - <<'PY'
+          import glob, json
+          def load(p):
+              try: return json.load(open(p))
+              except Exception: return {}
+          for p in glob.glob("build/*.build.json"):
+              for e in (load(p).get("errors") or [])[:15]:
+                  where = e.get("sourceURL", "").split("#")[0].split("/")[-1]
+                  print(f"::error title=Build error {where}::{e.get('message', '')}".replace("\n", " "))
+          for p in glob.glob("build/*.tests.json"):
+              phone = p.split("/")[-1].split(".xcresult")[0]
+              for f in (load(p).get("testFailures") or [])[:15]:
+                  print(f"::error title={phone}: {f.get('testName', '')}::{f.get('failureText', '')}".replace("\n", " "))
+          PY
+
+      - name: Collect and name the screenshots
+        if: always()
+        run: |
+          shopt -s nullglob
+          mkdir -p publish
+          for bundle in build/*.xcresult; do
+            [ "$bundle" = build/Build.xcresult ] && continue
+            phone=$(basename "$bundle" .xcresult)
+            out="build/attachments/$phone"
+            mkdir -p "$out"
+            xcrun xcresulttool export attachments --path "$bundle" --output-path "$out" || continue
+            # Name each picture after its phone and step, e.g. "iPhone Duo - 4-position-card.png"
+            python3 - "$out" "$phone" <<'PY'
+          import json, shutil, sys
+          out, phone = sys.argv[1], sys.argv[2]
+          try:
+              manifest = json.load(open(f"{out}/manifest.json"))
+          except Exception:
+              manifest = []
+          for test in manifest:
+              for a in test.get("attachments", []):
+                  step = a["suggestedHumanReadableName"].split("_0_")[0]
+                  step = "".join(c for c in step if c not in '"<>|*?:\\/\r\n')
+                  shutil.copy(f"{out}/{a['exportedFileName']}", f"publish/{phone} - {step}.png")
+          PY
+          done
+          # Simulator screenshots are always upright; turn the sideways ones
+          for f in publish/*open-duo*.png; do sips -r 270 "$f" >/dev/null || true; done
+          files=(publish/*.png)
+          echo "::notice title=Screenshots::${#files[@]} taken"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: publish
+          retention-days: 7
+          if-no-files-found: ignore
+
+  publish:
+    name: Publish screenshots
+    needs: app
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # only to publish screenshots to the screenshots branch
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: screenshots
+          path: publish
+        continue-on-error: true
+
+      - name: Publish screenshots to the screenshots branch
+        run: |
+          shopt -s nullglob
+          mkdir -p publish
+          files=(publish/*.png)
+          echo "::notice title=Screenshots::${#files[@]} published"
+          [ ${#files[@]} -eq 0 ] && exit 0
+          cd publish
+          git init -q -b screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Screenshots from ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" screenshots

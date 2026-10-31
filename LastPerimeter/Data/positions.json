@@ -1,0 +1,34 @@
+{
+  "positions": [
+    {
+      "id": "rifle_squad",
+      "name": "Rifle squad",
+      "role": "Cheap all-rounder",
+      "manual": "A few riflemen with suppressed carbines. Cheap and quiet, so they don't draw the horde. Good against Walkers and Runners in small numbers.",
+      "levels": [
+        { "sprite": "rifle_squad_1", "title": "Fire team", "cost": 60, "range": 2.6, "damage": 7, "fireInterval": 0.7, "noise": 10 },
+        { "sprite": "rifle_squad_2", "title": "Rifle squad", "cost": 70, "range": 2.8, "damage": 9, "fireInterval": 0.55, "noise": 12 }
+      ]
+    },
+    {
+      "id": "mg_nest",
+      "name": "Machine gun nest",
+      "role": "Crowd control",
+      "manual": "A machine gun behind sandbags. Fires fast and slows the infantry-type zombies it hits. Loud: later, its noise will draw more of the horde.",
+      "levels": [
+        { "sprite": "mg_nest_1", "title": "LMG team", "cost": 100, "range": 2.4, "damage": 3, "fireInterval": 0.14, "noise": 40, "slowFactor": 0.6, "slowSeconds": 0.4 },
+        { "sprite": "mg_nest_2", "title": "HMG nest", "cost": 90, "range": 2.6, "damage": 4, "fireInterval": 0.1, "noise": 45, "slowFactor": 0.5, "slowSeconds": 0.5 }
+      ]
+    },
+    {
+      "id": "sniper_team",
+      "name": "Sniper team",
+      "role": "Single-target damage",
+      "manual": "A sniper and a spotter. Long reach and heavy single shots, slow between them. Best for picking off dangerous zombies before they reach the line.",
+      "levels": [
+        { "sprite": "sniper_1", "title": "Sniper team", "cost": 90, "range": 4.2, "damage": 40, "fireInterval": 2.0, "noise": 25 },
+        { "sprite": "sniper_2", "title": "Suppressed + rangefinder", "cost": 80, "range": 4.6, "damage": 70, "fireInterval": 1.8, "noise": 15 }
+      ]
+    }
+  ]
+}
