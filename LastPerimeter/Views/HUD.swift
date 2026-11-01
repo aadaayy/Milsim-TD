@@ -124,8 +124,19 @@ struct ControlBar: View {
     private var waveButtonContent: some View {
         switch session.phase {
         case .build:
-            Button("START ROUND 1", action: session.startNextWave)
-                .buttonStyle(PrimaryButtonStyle())
+            Button(action: session.startNextWave) {
+                if column {
+                    // The side bar is narrow: two short lines instead of one cut-off one.
+                    VStack(spacing: 1) {
+                        Text("START")
+                        Text("ROUND 1")
+                    }
+                    .padding(.vertical, 4)
+                } else {
+                    Text("START ROUND 1")
+                }
+            }
+                .buttonStyle(PrimaryButtonStyle(inset: column ? 8 : 16))
                 .frame(maxWidth: .infinity)
                 .accessibilityIdentifier("start-wave")
         case .pause:
