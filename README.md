@@ -4,13 +4,15 @@ Last Perimeter, a milsim tower defense game for iPhone, and its art. Models are 
 
 ## The app
 
-The app plays chapter 1, level 1 ("Crossroads"): build rifle squads, machine gun nests and sniper teams on the pads beside the road, start each round, upgrade or sell positions, and hold the Command Post for 50 rounds. Each position goes to level 2, then to one of two level 3 versions (3A or 3B). Walkers and runners come first; crawlers, screamers, bloaters and armored zombies join over the rounds, with a Brute boss every tenth round and the Behemoth at rounds 25 and 50. Pause and the speed button (1x, 2x, 3x) are on every layout.
+The app plays chapter 1, level 1 ("Crossroads"): drag rifle squads, machine gun nests and sniper teams from the see-through panel onto any open tile of the map (not the road, the trees, the buildings or the Command Post), or tap a free tile and pick one, start each round, upgrade or sell positions, and hold the Command Post for 50 rounds. Each position goes to level 2, then to one of two level 3 versions (3A or 3B). Walkers and runners come first; crawlers, screamers, bloaters and armored zombies join over the rounds, with a Brute boss every tenth round and the Behemoth at rounds 25 and 50. Pause and the speed button (1x, 2x, 3x) are on every layout.
+
+The map always gets as much of the screen as it can take. The panel floats over its right-hand side, see-through so the battlefield shows behind it, and its chevron folds it away to a small tab. While a position is dragged, the tile it would land on (just above the fingertip) shows green with its reach, or red where it can't go.
 
 It fits four phones:
 
-- a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top, controls under it for one thumb
-- the iPhone Duo folded: the level strip across the top, the battlefield on the left with the next round under it, and a side bar on the right with supply, the build menu or position card, and the round, pause and speed buttons
-- the iPhone Duo open: battlefield on one half, the full command panel (build menu with descriptions, position card with its next upgrade or level 3 choice, round intel) on the other
+- a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top with the panel over it, and supply and the round, pause and speed buttons in a bar under it for one thumb
+- the iPhone Duo folded: the level strip across the top and the battlefield at full height, with the panel as a side bar over its right-hand side holding supply, the positions or a position's card, and the round, pause and speed buttons
+- the iPhone Duo open: battlefield on one half with the positions to drag beside it, and the full command panel (build list with descriptions, position card with its next upgrade or level 3 choice, round intel) on the other
 
 ```
 LastPerimeter/

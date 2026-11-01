@@ -94,6 +94,34 @@ public struct ZombieType: Codable, Identifiable, Equatable {
     }
 }
 
+/// One tile of the map, by column and row (row 0 is the top row).
+public struct TileCoord: Hashable, Codable, CustomStringConvertible {
+    public var col: Int
+    public var row: Int
+
+    public init(_ col: Int, _ row: Int) {
+        self.col = col
+        self.row = row
+    }
+
+    /// The tile's middle, in tiles.
+    public var center: Vec2 { Vec2(Double(col) + 0.5, Double(row) + 0.5) }
+
+    /// The tile a map point (in tiles) falls on.
+    public init(containing point: Vec2) {
+        self.init(Int(point.x.rounded(.down)), Int(point.y.rounded(.down)))
+    }
+
+    /// "col,row", as the screenshot setups write it.
+    public var description: String { "\(col),\(row)" }
+
+    public init?(_ text: String) {
+        let parts = text.split(separator: ",").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+        guard parts.count == 2 else { return nil }
+        self.init(parts[0], parts[1])
+    }
+}
+
 /// One level: its map, its path, its waves and its starting numbers.
 public struct LevelSpec: Codable, Equatable {
     public var id: String
@@ -106,8 +134,9 @@ public struct LevelSpec: Codable, Equatable {
     /// Real size of one tile, so sprites drawn in meters come out the right size.
     public var tileMeters: Double
     /// One string per row, top row first. Each character is one tile:
-    /// . grass, R road, F forest, T tin-roof building, H flat-roof building,
-    /// S build slot, C Command Post ground.
+    /// . open ground, R road, F forest, T tin-roof building, H flat-roof building,
+    /// C Command Post ground. Positions can be built on any open ground tile
+    /// that the road doesn't cross. (S, an old fixed build pad, reads as open ground.)
     public var tiles: [String]
     /// Tile coordinates the zombies walk through, from the map edge to the Command Post.
     /// Each point is a tile's column and row; the walk goes through tile centers.
@@ -136,15 +165,15 @@ public struct LevelSpec: Codable, Equatable {
         return Tile(rawValue: line[col]) ?? .grass
     }
 
-    /// Build slots in reading order (top row first), as tile centers.
-    public var slots: [Vec2] {
-        var found: [Vec2] = []
-        for row in 0..<rows {
-            for col in 0..<cols where tile(col: col, row: row) == .slot {
-                found.append(Vec2(Double(col) + 0.5, Double(row) + 0.5))
-            }
-        }
-        return found
+    public func tile(_ at: TileCoord) -> Tile { tile(col: at.col, row: at.row) }
+
+    public func contains(_ at: TileCoord) -> Bool { at.col >= 0 && at.col < cols && at.row >= 0 && at.row < rows }
+
+    /// Open ground: nothing on it but grass, so a position can go there unless the road crosses it.
+    public func isOpenGround(_ at: TileCoord) -> Bool {
+        guard contains(at) else { return false }
+        let kind = tile(at)
+        return kind == .grass || kind == .slot
     }
 
     /// Problems with the file, in plain words (empty when it's fine).
@@ -159,7 +188,8 @@ public struct LevelSpec: Codable, Equatable {
         for (a, b) in zip(path, path.dropFirst()) where a.x != b.x && a.y != b.y {
             problems.append("\(id): path step \(a.x),\(a.y) to \(b.x),\(b.y) isn't straight along a row or column")
         }
-        if slots.isEmpty { problems.append("\(id): no build slots") }
+        let open = (0..<rows).flatMap { row in (0..<cols).map { TileCoord($0, row) } }.filter(isOpenGround)
+        if open.isEmpty { problems.append("\(id): no open ground to build on") }
         if waves.isEmpty { problems.append("\(id): no waves") }
         for type in catalog.positions {
             if let options = type.specializations, options.count != 2 {

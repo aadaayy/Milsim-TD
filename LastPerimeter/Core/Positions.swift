@@ -18,10 +18,10 @@ public enum TargetPriority: String, CaseIterable, Codable {
     }
 }
 
-/// A crewed position on a build slot.
+/// A crewed position on one tile of open ground.
 public struct Position: Identifiable, Equatable {
     public let id: Int
-    public let slot: Int
+    public let tile: TileCoord
     public let type: String
     /// 0 for level 1, 1 for level 2, 2 for level 3.
     public var level: Int

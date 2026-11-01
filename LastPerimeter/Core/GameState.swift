@@ -30,7 +30,8 @@ public final class GameState {
     public let level: LevelSpec
     public let catalog: GameCatalog
     public let track: PathTrack
-    public let slots: [Vec2]
+    /// Every tile a position can go on: open ground the road doesn't cross.
+    public let buildable: Set<TileCoord>
 
     public private(set) var phase: GamePhase = .build
     public private(set) var supply: Int
@@ -54,7 +55,14 @@ public final class GameState {
         self.level = level
         self.catalog = catalog
         track = PathTrack(tiles: level.path)
-        slots = level.slots
+        var open = Set<TileCoord>()
+        for row in 0..<level.rows {
+            for col in 0..<level.cols {
+                let at = TileCoord(col, row)
+                if level.isOpenGround(at) && !track.covers(col: col, row: row) { open.insert(at) }
+            }
+        }
+        buildable = open
         supply = level.startSupply
         commandPostHealth = level.commandPostHealth
         random = SeededRandom(seed: seed)
@@ -76,7 +84,7 @@ public final class GameState {
 
     // MARK: Building
 
-    public func position(onSlot slot: Int) -> Position? { positions.first { $0.slot == slot } }
+    public func position(at tile: TileCoord) -> Position? { positions.first { $0.tile == tile } }
     public func position(id: Int) -> Position? { positions.first { $0.id == id } }
 
     public func levelSpec(of position: Position) -> PositionLevel? {
@@ -99,17 +107,21 @@ public final class GameState {
         upgradeOptions(of: position).first
     }
 
-    public func canBuild(_ type: String, onSlot slot: Int) -> Bool {
-        guard !isOver, slots.indices.contains(slot), position(onSlot: slot) == nil,
-              let cost = catalog.position(type)?.levels.first?.cost else { return false }
+    /// Whether the tile is open ground with nothing built on it yet.
+    public func isFree(_ tile: TileCoord) -> Bool {
+        buildable.contains(tile) && position(at: tile) == nil
+    }
+
+    public func canBuild(_ type: String, at tile: TileCoord) -> Bool {
+        guard !isOver, isFree(tile), let cost = catalog.position(type)?.levels.first?.cost else { return false }
         return supply >= cost
     }
 
     @discardableResult
-    public func build(_ type: String, onSlot slot: Int) -> [GameEvent] {
-        guard canBuild(type, onSlot: slot), let cost = catalog.position(type)?.levels.first?.cost else { return [] }
+    public func build(_ type: String, at tile: TileCoord) -> [GameEvent] {
+        guard canBuild(type, at: tile), let cost = catalog.position(type)?.levels.first?.cost else { return [] }
         supply -= cost
-        let position = Position(id: takeID(), slot: slot, type: type, level: 0, center: slots[slot], spent: cost)
+        let position = Position(id: takeID(), tile: tile, type: type, level: 0, center: tile.center, spent: cost)
         positions.append(position)
         return [.built(position: position.id)]
     }

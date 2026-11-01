@@ -5,9 +5,9 @@ import Foundation
 /// the screenshot setups use it to reach a late round with a true defense.
 public struct AutoPlayer {
     public enum Step: Equatable {
-        case build(String, slot: Int, priority: TargetPriority = .first)
+        case build(String, at: TileCoord, priority: TargetPriority = .first)
         /// `branch` picks 3A (0) or 3B (1) when the upgrade is to level 3.
-        case upgrade(slot: Int, branch: Int = 0)
+        case upgrade(at: TileCoord, branch: Int = 0)
     }
 
     public let steps: [Step]
@@ -24,11 +24,11 @@ public struct AutoPlayer {
     public mutating func act(on game: GameState) {
         while let step = steps[safe: taken] {
             switch step {
-            case .build(let type, let slot, let priority):
-                guard !game.build(type, onSlot: slot).isEmpty, let p = game.position(onSlot: slot) else { return }
+            case .build(let type, let tile, let priority):
+                guard !game.build(type, at: tile).isEmpty, let p = game.position(at: tile) else { return }
                 game.setPriority(priority, for: p.id)
-            case .upgrade(let slot, let branch):
-                guard let p = game.position(onSlot: slot), !game.upgrade(p.id, branch: branch).isEmpty else { return }
+            case .upgrade(let tile, let branch):
+                guard let p = game.position(at: tile), !game.upgrade(p.id, branch: branch).isEmpty else { return }
             }
             taken += 1
         }
@@ -50,19 +50,33 @@ public struct AutoPlayer {
         return events
     }
 
+    /// Ten spots on the first map beside the bends in the road, top row first.
+    /// They were its fixed build pads before every open tile could take a
+    /// position; the strong build order and the screenshot setups still use them.
+    public static let firstMapSpots: [TileCoord] = [
+        TileCoord(6, 1), TileCoord(3, 3), TileCoord(0, 4), TileCoord(6, 5), TileCoord(3, 7),
+        TileCoord(8, 8), TileCoord(2, 9), TileCoord(6, 10), TileCoord(2, 11), TileCoord(6, 11),
+    ]
+
+    private static func spot(_ n: Int) -> TileCoord { firstMapSpots[n] }
+    private static func place(_ type: String, _ n: Int, priority: TargetPriority = .first) -> Step {
+        .build(type, at: spot(n), priority: priority)
+    }
+    private static func raise(_ n: Int, branch: Int = 0) -> Step { .upgrade(at: spot(n), branch: branch) }
+
     /// A strong defense for the first map: rifles and a machine gun early,
     /// snipers for the armor, then every position to level 3. The sniper on
-    /// pad 3 aims at the strongest zombie, so it works on the bosses.
+    /// spot 3 aims at the strongest zombie, so it works on the bosses.
     public static let firstMap: [Step] = [
-        .build("rifle_squad", slot: 1), .build("rifle_squad", slot: 7), .build("mg_nest", slot: 4),
-        .upgrade(slot: 1), .build("sniper_team", slot: 3, priority: .strongest), .upgrade(slot: 4),
-        .upgrade(slot: 7), .build("mg_nest", slot: 9), .build("sniper_team", slot: 6), .upgrade(slot: 3),
-        .upgrade(slot: 9), .upgrade(slot: 6),
-        .build("rifle_squad", slot: 2), .build("mg_nest", slot: 5), .upgrade(slot: 4, branch: 1),
-        .upgrade(slot: 3, branch: 0), .upgrade(slot: 2), .upgrade(slot: 5), .upgrade(slot: 1, branch: 0),
-        .upgrade(slot: 6, branch: 1), .upgrade(slot: 9, branch: 0), .upgrade(slot: 7, branch: 1),
-        .build("sniper_team", slot: 0), .upgrade(slot: 0), .build("rifle_squad", slot: 8), .upgrade(slot: 8),
-        .upgrade(slot: 2, branch: 1), .upgrade(slot: 5, branch: 1), .upgrade(slot: 0, branch: 1),
-        .upgrade(slot: 8, branch: 0),
+        place("rifle_squad", 1), place("rifle_squad", 7), place("mg_nest", 4),
+        raise(1), place("sniper_team", 3, priority: .strongest), raise(4),
+        raise(7), place("mg_nest", 9), place("sniper_team", 6), raise(3),
+        raise(9), raise(6),
+        place("rifle_squad", 2), place("mg_nest", 5), raise(4, branch: 1),
+        raise(3, branch: 0), raise(2), raise(5), raise(1, branch: 0),
+        raise(6, branch: 1), raise(9, branch: 0), raise(7, branch: 1),
+        place("sniper_team", 0), raise(0), place("rifle_squad", 8), raise(8),
+        raise(2, branch: 1), raise(5, branch: 1), raise(0, branch: 1),
+        raise(8, branch: 0),
     ]
 }

@@ -185,15 +185,15 @@ struct ContextPanel: View {
     var body: some View {
         Group {
             switch session.selection {
-            case .slot(let slot):
-                BuildMenu(session: session, slot: slot, roomy: roomy, column: column)
+            case .tile:
+                BuildMenu(session: session, roomy: roomy, column: column)
             case .position(let id):
                 PositionCard(session: session, id: id, roomy: roomy, column: column)
             case .none:
                 if showsIntel {
                     WaveIntel(session: session, roomy: roomy, column: column)
                 } else {
-                    Text("Tap a pad on the map to build there. Tap a position to see its card.")
+                    Text("Drag a position onto any open tile, or tap a tile to build there. Tap a position to see its card.")
                         .font(.system(size: 13)).foregroundStyle(Theme.dim)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -205,17 +205,16 @@ struct ContextPanel: View {
     }
 }
 
-/// The three positions that can go on a pad, with their costs.
+/// The three positions that can go on the picked tile, with their costs.
 struct BuildMenu: View {
     let session: GameSession
-    let slot: Int
     var roomy = false
     var column = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text(column ? "PAD \(slot + 1)" : "BUILD ON PAD \(slot + 1)").font(.stencil(13)).foregroundStyle(Theme.dim)
+                Text(column ? "BUILD HERE" : "BUILD ON THIS TILE").font(.stencil(13)).foregroundStyle(Theme.dim)
                 Spacer()
                 Button("Cancel") { session.selection = .none }
                     .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.sand)
@@ -584,7 +583,7 @@ struct WaveIntel: View {
                 }
             }
             if session.phase == .build {
-                Text("Tap a cleared pad on the map to build. Tap a position for its card.")
+                Text("Drag a position onto any open tile, or tap a tile to build there. Tap a position for its card.")
                     .font(.system(size: 12)).foregroundStyle(Theme.dim)
             }
         }

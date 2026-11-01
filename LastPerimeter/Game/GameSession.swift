@@ -5,10 +5,18 @@ import UIKit
 /// What the player has picked on the map.
 enum Selection: Equatable {
     case none
-    /// An empty build slot, by index: the build menu shows.
-    case slot(Int)
+    /// An empty tile of open ground: the build menu for it shows.
+    case tile(TileCoord)
     /// A built position, by id: its card shows.
     case position(Int)
+}
+
+/// A position being dragged onto the map: which kind, the tile it would go
+/// on (nil while the finger is off the map) and whether it can go there.
+struct Placement: Equatable {
+    var type: String
+    var tile: TileCoord?
+    var valid: Bool
 }
 
 /// One level being played, shared by the battlefield scene and the screens
@@ -35,6 +43,10 @@ final class GameSession {
 
     /// The scene draws the ring or highlight for this each frame.
     var selection: Selection = .none
+    /// While a position is dragged from the panel, the scene shows where it would land.
+    var placement: Placement?
+    /// The see-through panel over the map, folded away to show the whole map.
+    var panelCollapsed = false
     /// 1, 2 or 3 times normal speed.
     var speed = 1
     var isPaused = false
@@ -81,15 +93,43 @@ final class GameSession {
 
     // MARK: Player actions
 
+    /// Builds on the tile picked on the map.
     func build(_ type: String) {
-        guard case .slot(let slot) = selection else { return }
-        let events = game.build(type, onSlot: slot)
-        guard case .built(let id)? = events.first else { return }
+        guard case .tile(let tile) = selection else { return }
+        build(type, at: tile)
+    }
+
+    @discardableResult
+    func build(_ type: String, at tile: TileCoord) -> Bool {
+        let events = game.build(type, at: tile)
+        guard case .built(let id)? = events.first else { return false }
         Haptics.tap()
         positionsVersion += 1
         refresh()
         scene.positionsChanged()
         selection = .position(id)
+        return true
+    }
+
+    // MARK: Drag and drop
+
+    /// The finger, dragging a position, is over `tile` (nil when off the map).
+    func drag(_ type: String, over tile: TileCoord?) {
+        let valid = tile.map { game.canBuild(type, at: $0) } ?? false
+        let next = Placement(type: type, tile: tile, valid: valid)
+        guard next != placement else { return }
+        if next.tile != nil && next.tile != placement?.tile { Haptics.tick() }
+        if selection != .none { selection = .none }
+        placement = next
+    }
+
+    /// The finger let go: build there if it can go there.
+    func drop(_ type: String, on tile: TileCoord?) {
+        placement = nil
+        guard let tile, build(type, at: tile) else {
+            if tile != nil { Haptics.failure() }
+            return
+        }
     }
 
     /// `branch` picks 3A (0) or 3B (1) when the upgrade is to level 3.
@@ -142,8 +182,9 @@ final class GameSession {
 
     /// Applies the automatic checks' launch arguments: "-demo" builds a defense,
     /// "-startWave N" sends round N, "-playTo N" plays the strong build order for
-    /// real until round N starts, "-selectSlot N" and "-selectPosition N" pick on
-    /// the map, "-speed N", "-paused" and "-endScreen win|lose" jump ahead.
+    /// real until round N starts, "-selectTile C,R" and "-selectPosition C,R" pick
+    /// on the map, "-dragPreview TYPE C,R" freezes a drag over a tile, "-speed N",
+    /// "-paused" and "-endScreen win|lose" jump ahead.
     /// The long setups play the level ahead in short bursts, so the app stays
     /// responsive (and the automatic checks can see it launch) while they run.
     func applyLaunchArguments(_ arguments: [String]) async {
@@ -153,11 +194,12 @@ final class GameSession {
         }
         if arguments.contains("-demo") {
             game.grantSupply(600)
-            for (type, slot) in [("rifle_squad", 3), ("rifle_squad", 4), ("mg_nest", 1), ("sniper_team", 7), ("mg_nest", 5)] {
-                game.build(type, onSlot: slot)
+            let spots = AutoPlayer.firstMapSpots
+            for (type, spot) in [("rifle_squad", 3), ("rifle_squad", 4), ("mg_nest", 1), ("sniper_team", 7), ("mg_nest", 5)] {
+                game.build(type, at: spots[spot])
             }
-            if let p = game.position(onSlot: 3) { game.upgrade(p.id) }
-            if let p = game.position(onSlot: 1) { game.upgrade(p.id) }
+            if let p = game.position(at: spots[3]) { game.upgrade(p.id) }
+            if let p = game.position(at: spots[1]) { game.upgrade(p.id) }
             game.grantSupply(-(game.supply - 245))
             positionsVersion += 1
             scene.positionsChanged()
@@ -175,9 +217,13 @@ final class GameSession {
             positionsVersion += 1
             scene.positionsChanged()
         }
-        if let slot = value("-selectSlot").flatMap(Int.init) { selection = .slot(slot) }
-        if let slot = value("-selectPosition").flatMap(Int.init), let p = game.position(onSlot: slot) {
+        if let tile = value("-selectTile").flatMap(TileCoord.init) { selection = .tile(tile) }
+        if let tile = value("-selectPosition").flatMap(TileCoord.init), let p = game.position(at: tile) {
             selection = .position(p.id)
+        }
+        if let type = value("-dragPreview"), let i = arguments.firstIndex(of: "-dragPreview"),
+           let tile = arguments[safe: i + 2].flatMap(TileCoord.init) {
+            drag(type, over: tile)
         }
         if let speed = value("-speed").flatMap(Int.init) { self.speed = min(max(speed, 1), 3) }
         if arguments.contains("-paused") { isPaused = true }
@@ -210,6 +256,8 @@ final class GameSession {
 /// Short taps of feedback, so hits and builds can be felt.
 enum Haptics {
     static func tap() { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+    /// A light click as a dragged position moves onto the next tile.
+    static func tick() { UISelectionFeedbackGenerator().selectionChanged() }
     static func thud() { UIImpactFeedbackGenerator(style: .heavy).impactOccurred() }
     static func success() { UINotificationFeedbackGenerator().notificationOccurred(.success) }
     static func failure() { UINotificationFeedbackGenerator().notificationOccurred(.error) }

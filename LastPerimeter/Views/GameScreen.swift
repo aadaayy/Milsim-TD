@@ -1,10 +1,12 @@
 import SwiftUI
 
-/// A level being played, laid out for the shape of the screen:
+/// A level being played, laid out for the shape of the screen. Every layout
+/// gives the map as much room as it can take, with a see-through panel
+/// floating over its right-hand side to drag positions from:
 /// - tall and narrow (a regular iPhone or Pro Max, upright): the map with
-///   the controls under it, all within thumb reach
-/// - upright but stubbier (the folded iPhone Duo): the map on the left and
-///   a side bar of controls on the right, using the width beside the map
+///   supply and the round buttons in a bar under it, within thumb reach
+/// - upright but stubbier (the folded iPhone Duo): the map at full height,
+///   with the panel as a side bar holding supply and the round buttons too
 /// - wide (the open iPhone Duo): the map on one half and the full command
 ///   panel, with room to explain everything, on the other
 struct GameScreen: View {
@@ -22,17 +24,14 @@ struct GameScreen: View {
                 if wide {
                     WideGameLayout(map: mapPane, panel: CommandPanel(session: session))
                 } else if sideBar {
-                    FoldedGameLayout(session: session, size: geometry.size, onMenu: onMenu)
+                    VStack(spacing: 0) {
+                        TopStrip(session: session, onMenu: onMenu)
+                        MapView(session: session, panel: .folded)
+                    }
                 } else {
                     VStack(spacing: 0) {
                         TopStrip(session: session, onMenu: onMenu)
-                        MapView(session: session)
-                        ScrollView {
-                            ContextPanel(session: session)
-                        }
-                        .scrollIndicators(.hidden)
-                        .frame(height: 118, alignment: .top)
-                        .padding(.top, 6)
+                        MapView(session: session, panel: .phone)
                         ControlBar(session: session)
                     }
                 }
@@ -46,7 +45,7 @@ struct GameScreen: View {
     private var mapPane: some View {
         VStack(spacing: 0) {
             TopStrip(session: session, onMenu: onMenu)
-            MapView(session: session)
+            MapView(session: session, panel: .open)
         }
     }
 }
@@ -85,83 +84,6 @@ struct CommandPanel: View {
         .background(Theme.panel)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("command-panel")
-    }
-}
-
-/// The folded Duo: the level's strip across the top, the map on the left with
-/// what's coming next under it, and a side bar of controls on the right.
-///
-/// The folded screen is too wide for the map to fill it upright, so the side
-/// bar takes the width the map can't use, and its panel runs on into the
-/// screen's right-hand margin.
-struct FoldedGameLayout: View {
-    let session: GameSession
-    let size: CGSize
-    let onMenu: () -> Void
-
-    var body: some View {
-        let barWidth = min(220, max(150, size.width * 0.4))
-        let mapWidth = size.width - barWidth - 1
-        let scene = session.scene!.size
-        let paneHeight = size.height - 46
-        let mapHeight = min(paneHeight, mapWidth * scene.height / scene.width)
-        // Room under the map for the next round, so the side bar can keep to the controls.
-        let intelUnderMap = paneHeight - mapHeight >= 120
-        VStack(spacing: 0) {
-            TopStrip(session: session, onMenu: onMenu)
-            HStack(spacing: 0) {
-                VStack(spacing: 0) {
-                    MapView(session: session)
-                        .frame(height: mapHeight)
-                    if intelUnderMap {
-                        ScrollView {
-                            WaveIntel(session: session, column: true)
-                                .padding(10)
-                        }
-                        .scrollIndicators(.hidden)
-                    }
-                }
-                .frame(width: mapWidth)
-                Rectangle().fill(Theme.edge).frame(width: 1).ignoresSafeArea(edges: .bottom)
-                SideBar(session: session, showsIntel: !intelUnderMap)
-                    .frame(width: barWidth)
-            }
-        }
-    }
-}
-
-/// The folded Duo's right-hand column: supply at the top, the build menu or a
-/// position's card in the middle, and the wave, pause and speed buttons at the
-/// bottom where the thumb rests.
-struct SideBar: View {
-    let session: GameSession
-    var showsIntel = true
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
-                SupplyLabel(amount: session.supply, size: 20)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Supply \(session.supply)")
-                    .accessibilityIdentifier("supply")
-                Spacer(minLength: 4)
-                Text("\(session.kills) KILLS").font(.stencil(12)).foregroundStyle(Theme.dim)
-                    .lineLimit(1).minimumScaleFactor(0.7)
-            }
-            .padding(.horizontal, 10)
-            Divider().overlay(Theme.edge)
-            ScrollView {
-                ContextPanel(session: session, column: true, showsIntel: showsIntel)
-                    .padding(.top, 2)
-            }
-            .scrollIndicators(.hidden)
-            Divider().overlay(Theme.edge)
-            ControlBar(session: session, column: true)
-        }
-        .padding(.top, 10)
-        .background(Theme.panel.ignoresSafeArea())
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("side-bar")
     }
 }
 

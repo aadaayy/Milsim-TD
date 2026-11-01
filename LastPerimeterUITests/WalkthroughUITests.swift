@@ -27,66 +27,108 @@ final class WalkthroughUITests: XCTestCase {
         add(attachment)
     }
 
-    /// Menu, build a rifle squad, start the first round and watch it come in at 2x.
+    /// The middle of a map tile, where a tap lands on it.
+    private func tile(_ app: XCUIApplication, _ col: Int, _ row: Int) -> XCUICoordinate {
+        let map = element(app, "battlefield").frame
+        let size = CGSize(width: map.width / 9, height: map.height / 15)
+        return app.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: map.minX + (CGFloat(col) + 0.5) * size.width,
+                                 dy: map.minY + (CGFloat(row) + 0.5) * size.height))
+    }
+
+    /// Drags a position from the panel onto a tile. A dragged position lands
+    /// on the tile just above the fingertip, so the finger stops a little lower.
+    private func drag(_ app: XCUIApplication, _ type: String, toCol col: Int, row: Int) {
+        let from = element(app, "tray-\(type)").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let to = tile(app, col, row).withOffset(CGVector(dx: 0, dy: 34))
+        from.press(forDuration: 0.2, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.3)
+    }
+
+    /// Menu, drag a rifle squad onto the map, tap a tile to build another, fold
+    /// the panel away and back, then start the first round and watch it at 2x.
     func testPlayFirstRound() {
         let app = launch()
         XCTAssertTrue(element(app, "play-level").waitForExistence(timeout: 20), "The menu shows the first level")
         capture(app, "1-menu")
 
         element(app, "play-level").tap()
-        let pad = element(app, "slot-3")
-        XCTAssertTrue(pad.waitForExistence(timeout: 10), "The battlefield shows its build pads")
+        XCTAssertTrue(element(app, "tray-rifle_squad").waitForExistence(timeout: 10), "The panel offers positions to drag")
+        XCTAssertTrue(element(app, "battlefield").exists, "The battlefield shows")
         XCTAssertTrue(element(app, "start-wave").exists, "The first round waits for the player")
         XCTAssertTrue(element(app, "pause").exists, "There's a pause button")
         XCTAssertTrue(element(app, "speed").exists, "There's a speed button")
         if UIDeviceName.current.contains("Duo") {
-            XCTAssertTrue(element(app, "side-bar").exists, "The folded Duo puts the controls in a side bar beside the map")
+            XCTAssertTrue(element(app, "side-bar").exists, "The folded Duo keeps its side bar, now over the map")
         }
         capture(app, "2-battlefield")
 
-        pad.tap()
-        let rifle = element(app, "build-rifle_squad")
-        XCTAssertTrue(rifle.waitForExistence(timeout: 5), "Tapping a pad opens the build menu")
-        capture(app, "3-build-menu")
-
-        rifle.tap()
+        drag(app, "rifle_squad", toCol: 3, row: 3)
+        XCTAssertTrue(element(app, "position-3-3").waitForExistence(timeout: 5), "Dropping a position on an open tile builds it there")
         XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 5), "The new position shows its card")
-        XCTAssertTrue(element(app, "position-3").exists, "The rifle squad stands on the pad")
-        capture(app, "4-position-card")
+        capture(app, "3-dragged-onto-tile")
+
+        tile(app, 2, 9).tap()
+        let rifle = element(app, "build-rifle_squad")
+        XCTAssertTrue(rifle.waitForExistence(timeout: 5), "Tapping a free tile offers what can go on it")
+        capture(app, "4-tap-a-tile")
+        rifle.tap()
+        XCTAssertTrue(element(app, "position-2-9").waitForExistence(timeout: 5), "Tapping a position in the list builds it on the tile")
+
+        element(app, "panel-collapse").tap()
+        XCTAssertTrue(element(app, "panel-expand").waitForExistence(timeout: 5), "The panel folds away to a tab")
+        XCTAssertTrue(element(app, "start-wave").exists, "The round button stays within reach")
+        capture(app, "5-panel-folded-away")
+        element(app, "panel-expand").tap()
+        XCTAssertTrue(element(app, "panel-collapse").waitForExistence(timeout: 5), "...and comes back")
 
         element(app, "start-wave").tap()
         element(app, "speed").tap()
         XCTAssertEqual(element(app, "speed").label, "Speed 2 times", "One tap on speed plays at 2x")
         sleep(5)
-        capture(app, "5-first-round-2x")
+        capture(app, "6-first-round-2x")
+    }
+
+    /// The map while a position is dragged over it: green with its reach on open
+    /// ground, red on the road.
+    func testDragPreview() {
+        var app = launch(["-play", "-dragPreview", "sniper_team", "5,4"])
+        XCTAssertTrue(element(app, "tray").waitForExistence(timeout: 20))
+        sleep(1)
+        capture(app, "7-drag-open-tile")
+        app.terminate()
+
+        app = launch(["-play", "-dragPreview", "mg_nest", "3,2"])
+        XCTAssertTrue(element(app, "tray").waitForExistence(timeout: 20))
+        sleep(1)
+        capture(app, "8-drag-on-the-road")
     }
 
     /// A level 2 rifle squad offers its two level 3 versions; pick one.
     func testLevelThreeChoice() {
-        let app = launch(["-demo", "-startWave", "4", "-warmup", "22", "-selectPosition", "3"])
+        let app = launch(["-demo", "-startWave", "4", "-warmup", "22", "-selectPosition", "6,5"])
         let choice = element(app, "upgrade-3a")
         XCTAssertTrue(choice.waitForExistence(timeout: 20), "A level 2 position offers level 3A")
         XCTAssertTrue(element(app, "upgrade-3b").exists, "...and level 3B")
         sleep(1)
-        capture(app, "6-level-3-choice")
+        capture(app, "9-level-3-choice")
 
         element(app, "upgrade-3b").tap()
         sleep(1)
         XCTAssertFalse(element(app, "upgrade-3a").exists, "Once picked, the choice is made")
-        capture(app, "7-level-3-picked")
+        capture(app, "10-level-3-picked")
     }
 
     /// Round 25 played for real: the Behemoth's first appearance, then paused at 2x.
     func testBossRoundAndPause() {
-        let app = launch(["-playTo", "25", "-warmup", "24", "-speed", "2", "-selectPosition", "3"])
+        let app = launch(["-playTo", "25", "-warmup", "24", "-speed", "2", "-selectPosition", "6,5"])
         XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 240), "Round 25 is reached with a defense up")
         XCTAssertTrue(element(app, "wave-label").label.contains("25"), "The strip shows round 25")
         sleep(2)
-        capture(app, "8-boss-round")
+        capture(app, "11-boss-round")
 
         element(app, "pause").tap()
         XCTAssertTrue(element(app, "paused-banner").waitForExistence(timeout: 5), "Pausing says so over the map")
-        capture(app, "9-paused")
+        capture(app, "12-paused")
         element(app, "pause").tap()
         XCTAssertFalse(element(app, "paused-banner").exists, "Play carries on")
     }
@@ -96,7 +138,7 @@ final class WalkthroughUITests: XCTestCase {
         let app = launch(["-endScreen", "win"])
         XCTAssertTrue(element(app, "end-screen").waitForExistence(timeout: 420), "The level ends with a result")
         sleep(1)
-        capture(app, "10-victory")
+        capture(app, "13-victory")
     }
 
     /// The open iPhone Duo's screen, drawn at its size on the Pro Max (the
@@ -107,19 +149,20 @@ final class WalkthroughUITests: XCTestCase {
 
         var app = launch(["-openDuoPreview"], landscape: true)
         XCTAssertTrue(element(app, "play-level").waitForExistence(timeout: 20))
-        capture(app, "11-open-duo-menu")
+        capture(app, "14-open-duo-menu")
         app.terminate()
 
-        app = launch(["-openDuoPreview", "-demo", "-startWave", "3", "-warmup", "20", "-selectPosition", "3"], landscape: true)
+        app = launch(["-openDuoPreview", "-demo", "-startWave", "3", "-warmup", "20", "-selectPosition", "6,5"], landscape: true)
         XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 20), "The open Duo puts the commands beside the map")
         XCTAssertTrue(element(app, "upgrade-3a").waitForExistence(timeout: 10), "The level 3 choice shows with room to explain")
         sleep(2)
-        capture(app, "12-open-duo-battle")
+        capture(app, "15-open-duo-battle")
         app.terminate()
 
-        app = launch(["-openDuoPreview", "-play", "-selectSlot", "0"], landscape: true)
+        app = launch(["-openDuoPreview", "-play", "-selectTile", "2,5"], landscape: true)
         XCTAssertTrue(element(app, "build-menu").waitForExistence(timeout: 20))
-        capture(app, "13-open-duo-build")
+        XCTAssertTrue(element(app, "tray-rifle_squad").exists, "The positions to drag sit beside the map")
+        capture(app, "16-open-duo-build")
     }
 }
 

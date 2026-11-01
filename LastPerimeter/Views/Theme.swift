@@ -20,6 +20,7 @@ enum Theme {
     static let mapEdgeUI = UIColor(red: 0.08, green: 0.09, blue: 0.06, alpha: 1)
     static let sandUI = UIColor(red: 0.86, green: 0.78, blue: 0.58, alpha: 1)
     static let healthUI = UIColor(red: 0.86, green: 0.30, blue: 0.22, alpha: 1)
+    static let goodUI = UIColor(red: 0.56, green: 0.80, blue: 0.36, alpha: 1)
 }
 
 extension Font {

@@ -8,6 +8,9 @@ import SpriteKit
 /// screen, SpriteKit's y counts up, so `point(_:)` flips them.
 final class BattlefieldScene: SKScene {
     static let tile: CGFloat = 64
+    /// Built positions are drawn this many tiles across at most, so neighbors
+    /// on side-by-side tiles only just touch.
+    static let positionFit: CGFloat = 1.2
 
     private weak var session: GameSession?
     private let game: GameState
@@ -23,7 +26,11 @@ final class BattlefieldScene: SKScene {
 
     private var positionNodes: [Int: PositionNode] = [:]
     private var zombieNodes: [Int: ZombieNode] = [:]
-    private var slotPads: [SKSpriteNode] = []
+    /// Faint lines around every tile a position can go on.
+    private let grid = SKShapeNode()
+    /// Where a dragged position would land, and whether it can.
+    private var placementNode: SKNode?
+    private var drawnPlacement: Placement?
     private var commandPostTop: SKSpriteNode?
     private var commandPostBase: SKSpriteNode?
     private var commandPostState = "intact"
@@ -135,16 +142,18 @@ final class BattlefieldScene: SKScene {
             ground.addChild(patch)
         }
 
-        // Build pads.
-        for (i, slot) in game.slots.enumerated() {
-            let pad = SKSpriteNode(texture: texture("terrain", "build_pad"))
-            pad.size = CGSize(width: Self.tile * 1.2, height: Self.tile * 1.2)
-            pad.position = point(slot)
-            pad.zPosition = 2
-            pad.name = "slot-\(i)"
-            ground.addChild(pad)
-            slotPads.append(pad)
+        // The tile grid over open ground, faint until a position is being placed.
+        let lines = CGMutablePath()
+        for tile in game.buildable {
+            let corner = point(Vec2(Double(tile.col), Double(tile.row + 1)))
+            lines.addRect(CGRect(x: corner.x, y: corner.y, width: Self.tile, height: Self.tile).insetBy(dx: 1.5, dy: 1.5))
         }
+        grid.path = lines
+        grid.strokeColor = UIColor(white: 1, alpha: 1)
+        grid.lineWidth = 1.5
+        grid.alpha = Self.restingGridAlpha
+        grid.zPosition = 3
+        ground.addChild(grid)
 
         // Trees and buildings.
         for row in 0..<level.rows {
@@ -217,6 +226,7 @@ final class BattlefieldScene: SKScene {
         syncPositions()
         syncCommandPost()
         syncSelection(session.selection)
+        syncPlacement(session.placement)
         session.handle(events)
     }
 
@@ -334,7 +344,7 @@ final class BattlefieldScene: SKScene {
             var node = positionNodes[position.id]
             if node?.spriteName != level.sprite {
                 node?.removeFromParent()
-                let made = PositionNode(sprite: sprite, fitting: Self.tile * 1.6, pointsPerMeter: pointsPerMeter,
+                let made = PositionNode(sprite: sprite, fitting: Self.tile * Self.positionFit, pointsPerMeter: pointsPerMeter,
                                         texture: { self.texture(sprite.atlas, $0) })
                 made.position = point(position.center)
                 made.zPosition = depth(position.center)
@@ -363,41 +373,80 @@ final class BattlefieldScene: SKScene {
         top.texture = texture("command_post", "command_post_n_\(state)")
     }
 
+    static let restingGridAlpha: CGFloat = 0.13
+
     private func syncSelection(_ selection: Selection) {
         guard selection != drawnSelection else { return }
         drawnSelection = selection
         selectionNode?.removeFromParent()
         selectionNode = nil
-        for pad in slotPads {
-            pad.removeAllActions()
-            pad.colorBlendFactor = 0
-            pad.setScale(1)
-        }
         switch selection {
         case .none:
             break
-        case .slot(let index):
-            guard slotPads.indices.contains(index) else { return }
-            let pad = slotPads[index]
-            pad.color = Theme.sandUI
-            pad.colorBlendFactor = 0.5
-            pad.run(.repeatForever(.sequence([.scale(to: 1.08, duration: 0.45), .scale(to: 1.0, duration: 0.45)])))
-            let ring = SKShapeNode(circleOfRadius: Self.tile * 0.62)
-            ring.strokeColor = Theme.sandUI
-            ring.lineWidth = 2.5
-            ring.position = pad.position
-            overlay.addChild(ring)
-            selectionNode = ring
+        case .tile(let tile):
+            let box = tileBox(color: Theme.sandUI, fill: 0.22)
+            box.position = point(tile.center)
+            box.run(.repeatForever(.sequence([.scale(to: 1.06, duration: 0.45), .scale(to: 1.0, duration: 0.45)])))
+            overlay.addChild(box)
+            selectionNode = box
         case .position(let id):
             guard let p = game.position(id: id), let spec = game.levelSpec(of: p) else { return }
-            let ring = SKShapeNode(circleOfRadius: CGFloat(spec.range) * Self.tile)
-            ring.fillColor = UIColor(white: 1, alpha: 0.08)
-            ring.strokeColor = Theme.sandUI.withAlphaComponent(0.85)
-            ring.lineWidth = 2
+            let ring = rangeRing(spec.range)
             ring.position = point(p.center)
             overlay.addChild(ring)
             selectionNode = ring
         }
+    }
+
+    /// A square the size of one tile, outlined and lightly filled.
+    private func tileBox(color: UIColor, fill: CGFloat) -> SKShapeNode {
+        let box = SKShapeNode(rectOf: CGSize(width: Self.tile - 3, height: Self.tile - 3), cornerRadius: 6)
+        box.strokeColor = color
+        box.fillColor = color.withAlphaComponent(fill)
+        box.lineWidth = 3
+        return box
+    }
+
+    private func rangeRing(_ range: Double) -> SKShapeNode {
+        let ring = SKShapeNode(circleOfRadius: CGFloat(range) * Self.tile)
+        ring.fillColor = UIColor(white: 1, alpha: 0.08)
+        ring.strokeColor = Theme.sandUI.withAlphaComponent(0.85)
+        ring.lineWidth = 2
+        return ring
+    }
+
+    /// While a position is dragged: the grid lights up, and the tile under it
+    /// shows green with the position's reach and a faint copy of it, or red
+    /// where it can't go (the road, trees, a building, a taken tile, or too
+    /// little supply).
+    private func syncPlacement(_ placement: Placement?) {
+        guard placement != drawnPlacement else { return }
+        let wasPlacing = drawnPlacement != nil
+        drawnPlacement = placement
+        placementNode?.removeFromParent()
+        placementNode = nil
+        if (placement != nil) != wasPlacing {
+            grid.removeAllActions()
+            grid.run(.fadeAlpha(to: placement == nil ? Self.restingGridAlpha : 0.32, duration: 0.15))
+        }
+        guard let placement, let tile = placement.tile else { return }
+        let node = SKNode()
+        node.position = point(tile.center)
+        let color = placement.valid ? Theme.goodUI : Theme.healthUI
+        node.addChild(tileBox(color: color, fill: 0.3))
+        if let first = game.catalog.position(placement.type)?.levels.first {
+            if placement.valid { node.addChild(rangeRing(first.range)) }
+            if let sprite = sprites.positions[first.sprite] {
+                let ghost = PositionNode(sprite: sprite, fitting: Self.tile * Self.positionFit, pointsPerMeter: pointsPerMeter,
+                                         texture: { self.texture(sprite.atlas, $0) })
+                ghost.alpha = placement.valid ? 0.75 : 0.4
+                ghost.zPosition = 1
+                node.addChild(ghost)
+            }
+        }
+        node.zPosition = 10
+        overlay.addChild(node)
+        placementNode = node
     }
 
     // MARK: Touch
@@ -406,13 +455,13 @@ final class BattlefieldScene: SKScene {
         guard let session, let touch = touches.first, !game.isOver else { return }
         let at = mapPoint(touch.location(in: self))
         if let p = game.positions.min(by: { $0.center.distance(to: at) < $1.center.distance(to: at) }),
-           p.center.distance(to: at) < 0.75 {
+           p.center.distance(to: at) < 0.6 {
             session.selection = session.selection == .position(p.id) ? .none : .position(p.id)
             return
         }
-        if let index = game.slots.indices.min(by: { game.slots[$0].distance(to: at) < game.slots[$1].distance(to: at) }),
-           game.slots[index].distance(to: at) < 0.75 {
-            session.selection = session.selection == .slot(index) ? .none : .slot(index)
+        let tile = TileCoord(containing: at)
+        if game.isFree(tile) {
+            session.selection = session.selection == .tile(tile) ? .none : .tile(tile)
             return
         }
         session.selection = .none

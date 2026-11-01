@@ -3,6 +3,9 @@ import XCTest
 @testable import PerimeterCore
 
 final class GameTests: XCTestCase {
+    /// The first map's ten spots beside the road (its old build pads).
+    let spots = AutoPlayer.firstMapSpots
+
     /// The app's Data folder, found relative to this file.
     static let dataFolder = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
@@ -33,7 +36,9 @@ final class GameTests: XCTestCase {
     func testDataFilesAreValid() throws {
         let (level, catalog) = try load()
         XCTAssertEqual(level.problems(catalog: catalog), [])
-        XCTAssertEqual(level.slots.count, 10)
+        let game = GameState(level: level, catalog: catalog)
+        XCTAssertEqual(game.buildable.count, 79, "Every open tile off the road takes a position")
+        for spot in spots { XCTAssertTrue(game.buildable.contains(spot), "Spot \(spot) is open ground") }
         XCTAssertEqual(level.waves.count, 50, "The first map runs 50 rounds")
         XCTAssertEqual(level.waves.filter { $0.boss == true }.count, 7)
         for type in catalog.positions {
@@ -76,11 +81,11 @@ final class GameTests: XCTestCase {
         let (level, catalog) = try load()
         let game = GameState(level: level, catalog: catalog)
         XCTAssertEqual(game.supply, 150)
-        XCTAssertFalse(game.build("rifle_squad", onSlot: 3).isEmpty)
+        XCTAssertFalse(game.build("rifle_squad", at: spots[3]).isEmpty)
         XCTAssertEqual(game.supply, 90)
-        XCTAssertTrue(game.build("rifle_squad", onSlot: 3).isEmpty, "A slot holds one position")
-        XCTAssertTrue(game.build("mg_nest", onSlot: 4).isEmpty, "Can't afford a machine gun with 90 left")
-        let id = try XCTUnwrap(game.position(onSlot: 3)?.id)
+        XCTAssertTrue(game.build("rifle_squad", at: spots[3]).isEmpty, "A tile holds one position")
+        XCTAssertTrue(game.build("mg_nest", at: spots[4]).isEmpty, "Can't afford a machine gun with 90 left")
+        let id = try XCTUnwrap(game.position(at: spots[3])?.id)
         XCTAssertFalse(game.upgrade(id).isEmpty)
         XCTAssertEqual(game.supply, 20)
         XCTAssertEqual(game.position(id: id)?.level, 1)
@@ -97,7 +102,30 @@ final class GameTests: XCTestCase {
         XCTAssertEqual(game.refund(for: id), 210)
         game.sell(id)
         XCTAssertEqual(game.supply, 260)
-        XCTAssertNil(game.position(onSlot: 3))
+        XCTAssertNil(game.position(at: spots[3]))
+    }
+
+    /// Any open tile takes a position, right next to another one too; the road,
+    /// trees, buildings, the Command Post and the map's edge don't.
+    func testBuildAnywhereOnOpenGround() throws {
+        let (level, catalog) = try load()
+        let game = GameState(level: level, catalog: catalog)
+        game.grantSupply(1000)
+        XCTAssertFalse(game.build("rifle_squad", at: TileCoord(2, 3)).isEmpty, "Open ground beside the road")
+        XCTAssertFalse(game.build("mg_nest", at: TileCoord(3, 3)).isEmpty, "The tile right next to it")
+        XCTAssertEqual(game.position(at: TileCoord(3, 3))?.center, Vec2(3.5, 3.5), "Positions stand in the middle of their tile")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(3, 3)), "One position per tile")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(4, 1)), "Not on the road")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(0, 0)), "Not in the trees")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(7, 3)), "Not on a building")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(4, 13)), "Not on the Command Post")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(9, 3)), "Not off the map")
+        XCTAssertFalse(game.canBuild("rifle_squad", at: TileCoord(-1, 3)), "Not off the map")
+        XCTAssertEqual(TileCoord(containing: Vec2(3.9, 7.2)), TileCoord(3, 7))
+        XCTAssertEqual(TileCoord("6,11"), TileCoord(6, 11))
+        let id = try XCTUnwrap(game.position(at: TileCoord(2, 3))?.id)
+        game.sell(id)
+        XCTAssertTrue(game.isFree(TileCoord(2, 3)), "Selling frees the tile")
     }
 
     func testArmorPierceAndSplash() throws {
@@ -124,8 +152,8 @@ final class GameTests: XCTestCase {
     func testTwoRiflesHoldTheFirstWave() throws {
         let (level, catalog) = try load()
         let game = GameState(level: level, catalog: catalog)
-        game.build("rifle_squad", onSlot: 3)
-        game.build("rifle_squad", onSlot: 4)
+        game.build("rifle_squad", at: spots[3])
+        game.build("rifle_squad", at: spots[4])
         let events = play(game) { game in
             if case .pause = game.phase { return true }
             return false
@@ -139,18 +167,18 @@ final class GameTests: XCTestCase {
     func testAShootingPositionTurnsToItsTarget() throws {
         let (level, catalog) = try load()
         let game = GameState(level: level, catalog: catalog)
-        game.build("sniper_team", onSlot: 1)
+        game.build("sniper_team", at: spots[1])
         let events = play(game) { $0.kills > 0 }
         let shots = events.filter { if case .shot = $0 { return true }; return false }
         XCTAssertFalse(shots.isEmpty)
-        let sniper = try XCTUnwrap(game.position(onSlot: 1))
+        let sniper = try XCTUnwrap(game.position(at: spots[1]))
         XCTAssertEqual(sniper.kills, 1)
     }
 
     func testMachineGunSlows() throws {
         let (level, catalog) = try load()
         let game = GameState(level: level, catalog: catalog)
-        game.build("mg_nest", onSlot: 1)
+        game.build("mg_nest", at: spots[1])
         play(game) { game in game.zombies.contains { $0.slowTime > 0 } }
         let slowed = try XCTUnwrap(game.zombies.first { $0.slowTime > 0 })
         XCTAssertLessThan(slowed.currentSpeed, slowed.speed)
@@ -160,8 +188,8 @@ final class GameTests: XCTestCase {
         let (level, catalog) = try load()
         func run() -> (Int, Int, Int) {
             let game = GameState(level: level, catalog: catalog, seed: 42)
-            game.build("rifle_squad", onSlot: 3)
-            game.build("rifle_squad", onSlot: 4)
+            game.build("rifle_squad", at: spots[3])
+            game.build("rifle_squad", at: spots[4])
             play(game, maxSeconds: 120)
             return (game.kills, game.supply, game.commandPostHealth)
         }
@@ -190,10 +218,10 @@ final class GameTests: XCTestCase {
     /// The same defense without level 3 holds a long while but not to the end.
     func testWithoutLevelThreeTheLateRoundsAreLost() throws {
         let (level, catalog) = try load()
-        var upgraded: Set<Int> = []
+        var upgraded: Set<TileCoord> = []
         let steps = AutoPlayer.firstMap.filter { step in
-            guard case .upgrade(let slot, _) = step else { return true }
-            return upgraded.insert(slot).inserted
+            guard case .upgrade(let tile, _) = step else { return true }
+            return upgraded.insert(tile).inserted
         }
         XCTAssertEqual(steps.count, 20)
         let game = GameState(level: level, catalog: catalog)
