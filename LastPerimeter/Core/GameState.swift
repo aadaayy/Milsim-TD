@@ -54,12 +54,13 @@ public final class GameState {
     public init(level: LevelSpec, catalog: GameCatalog, seed: UInt64 = 1) {
         self.level = level
         self.catalog = catalog
-        track = PathTrack(tiles: level.path)
+        let road = PathTrack(tiles: level.path)
+        track = road
         var open = Set<TileCoord>()
         for row in 0..<level.rows {
             for col in 0..<level.cols {
                 let at = TileCoord(col, row)
-                if level.isOpenGround(at) && !track.covers(col: col, row: row) { open.insert(at) }
+                if level.isOpenGround(at) && !road.covers(col: col, row: row) { open.insert(at) }
             }
         }
         buildable = open
