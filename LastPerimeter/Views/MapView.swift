@@ -143,6 +143,10 @@ struct MapView: View {
     }
 
     private func apply(_ layout: SceneLayout) {
+        // While a screen is still sizing up, the play area can be next to
+        // nothing, which would make the scene enormous; wait for a real size.
+        let full = BattlefieldScene.size(cols: session.level.cols, rows: session.level.rows, sideways: layout.sideways)
+        guard layout.viewport.width <= full.width * 4, layout.viewport.height <= full.height * 4 else { return }
         session.scene.layout(viewport: layout.viewport, mapOffset: layout.mapOffset, sideways: layout.sideways)
     }
 

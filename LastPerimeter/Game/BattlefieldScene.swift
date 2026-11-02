@@ -120,6 +120,10 @@ final class BattlefieldScene: SKScene {
         func near(_ a: CGFloat, _ b: CGFloat) -> Bool { abs(a - b) < 0.5 }
         guard turned != sideways || !near(viewport.width, size.width) || !near(viewport.height, size.height)
                 || !near(offset.x, mapOffset.x) || !near(offset.y, mapOffset.y) else { return }
+        // Never more than a few maps' worth of open country, however the screen sizes up.
+        let map = Self.size(cols: level.cols, rows: level.rows, sideways: turned)
+        guard viewport.width > 0, viewport.height > 0,
+              viewport.width <= map.width * 4, viewport.height <= map.height * 4 else { return }
         sideways = turned
         mapOffset = offset
         size = viewport
