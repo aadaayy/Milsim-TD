@@ -454,13 +454,13 @@ struct PositionCard: View {
                     Image("badge_level_\(name.lowercased())").resizable().frame(width: 16, height: 16)
                     Text(option.title.uppercased()).font(.stencil(13))
                         .lineLimit(1).minimumScaleFactor(0.6)
-                    if !column {
+                    if !column && !roomy {
                         Spacer(minLength: 2)
                         cost(option)
                     }
                 }
-                // In the narrow side bar the price gets its own line, so the name fits.
-                if column { cost(option) }
+                // In the side bar and the Command column the price gets its own line, so the name fits.
+                if column || roomy { cost(option) }
                 if roomy || column, let about = option.about {
                     Text(about).font(.system(size: 11)).tracking(0)
                         .multilineTextAlignment(.leading)
