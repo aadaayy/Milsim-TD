@@ -7,8 +7,8 @@ import SwiftUI
 ///   supply and the round buttons in a bar under it, within thumb reach
 /// - upright but stubbier (the folded iPhone Duo): the map at full height,
 ///   with the panel as a side bar holding supply and the round buttons too
-/// - wide (the open iPhone Duo): the map on one half and the full command
-///   panel, with room to explain everything, on the other
+/// - wide (the open iPhone Duo): the map with the positions beside it, and a
+///   narrow Command column on the right that can be put away to a slim rail
 struct GameScreen: View {
     let session: GameSession
     let onRetry: () -> Void
@@ -22,7 +22,7 @@ struct GameScreen: View {
             ZStack {
                 Theme.background.ignoresSafeArea()
                 if wide {
-                    WideGameLayout(map: mapPane, panel: CommandPanel(session: session))
+                    WideGameLayout(session: session, onMenu: onMenu)
                 } else if sideBar {
                     VStack(spacing: 0) {
                         TopStrip(session: session, onMenu: onMenu)
@@ -41,30 +41,71 @@ struct GameScreen: View {
             }
         }
     }
+}
 
-    private var mapPane: some View {
-        VStack(spacing: 0) {
-            TopStrip(session: session, onMenu: onMenu)
-            MapView(session: session, panel: .open)
+/// The open Duo: the map, with the positions to drag beside it, and on the
+/// right either the Command column or, when that's put away, a slim rail that
+/// keeps supply and the round, pause and speed buttons in reach. The map is
+/// as tall as the screen allows either way; putting Command away gives the
+/// map's side of the screen more room around it.
+struct WideGameLayout: View {
+    let session: GameSession
+    let onMenu: () -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            VStack(spacing: 0) {
+                TopStrip(session: session, onMenu: onMenu)
+                MapView(session: session, panel: .open)
+            }
+            Rectangle().fill(Theme.edge).frame(width: 1).ignoresSafeArea()
+            if session.commandHidden {
+                CommandRail(session: session)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            } else {
+                CommandPanel(session: session)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
         }
+        .animation(.easeOut(duration: 0.2), value: session.commandHidden)
     }
 }
 
-/// The open Duo's second half: the numbers, the build menu or a position's
-/// card with room to explain itself, what's coming next, and the controls.
+/// The open Duo's Command column: supply, kills, the build list or a
+/// position's card with room to explain itself, what's coming next, and the
+/// round, pause and speed buttons. Its button puts it away to a slim rail.
+/// Command Post health is in the strip over the map, so it isn't repeated here.
 struct CommandPanel: View {
     let session: GameSession
+    static let width: CGFloat = 320
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("COMMAND").font(.stencil(22)).foregroundStyle(Theme.text)
-                Spacer()
-                Text("\(session.kills) KILLS").font(.stencil(14)).foregroundStyle(Theme.dim)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
+                Text("COMMAND").font(.stencil(18)).foregroundStyle(Theme.text)
+                Spacer(minLength: 4)
+                Button(action: session.toggleCommand) {
+                    HStack(spacing: 4) {
+                        Text("HIDE").font(.stencil(12))
+                        Image(systemName: "chevron.right").font(.system(size: 12, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.text)
+                    .padding(.horizontal, 10)
+                    .frame(height: 30)
+                    .background(Theme.panelRaised, in: Capsule())
+                    .overlay(Capsule().strokeBorder(Theme.edge.opacity(0.7), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Hide Command")
+                .accessibilityIdentifier("command-hide")
             }
-            HStack(spacing: 14) {
-                SupplyLabel(amount: session.supply, size: 22)
-                CommandPostHealth(session: session, wide: true)
+            HStack(spacing: 10) {
+                SupplyLabel(amount: session.supply, size: 20)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Supply \(session.supply)")
+                    .accessibilityIdentifier("supply")
+                Spacer(minLength: 4)
+                Text("\(session.kills) KILLS").font(.stencil(13)).foregroundStyle(Theme.dim)
             }
             Divider().overlay(Theme.edge)
             ScrollView {
@@ -76,50 +117,54 @@ struct CommandPanel: View {
                 }
             }
             .scrollIndicators(.hidden)
-            ControlBar(session: session)
+            ControlBar(session: session, showsSupply: false)
                 .padding(.horizontal, -10)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .padding(.top, 12)
+        .frame(width: Self.width)
+        .frame(maxHeight: .infinity)
         .background(Theme.panel)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("command-panel")
     }
 }
 
-/// Two halves side by side.
-///
-/// On iPhone Duo, `ArrangementView` keeps both halves clear of the fold when
-/// the phone is partly folded. Older SDKs, which can't build `ArrangementView`,
-/// get a plain side-by-side layout; the automatic checks set NO_DUO_SDK when
-/// their Xcode is older than 27.1.
-struct WideGameLayout<Map: View, Panel: View>: View {
-    let map: Map
-    let panel: Panel
+/// The open Duo's Command column put away: a slim rail with the button to
+/// bring it back, supply and kills at the top and the round, pause and speed
+/// buttons at the bottom. Cards and the build list show in the panel beside
+/// the map meanwhile.
+struct CommandRail: View {
+    let session: GameSession
+    static let width: CGFloat = 124
 
     var body: some View {
-        #if NO_DUO_SDK
-        sideBySide
-        #else
-        if #available(iOS 27.1, *) {
-            ArrangementView {
-                map
-            } secondary: {
-                panel
+        VStack(spacing: 10) {
+            Button(action: session.toggleCommand) {
+                VStack(spacing: 4) {
+                    Image(systemName: "chevron.left").font(.system(size: 13, weight: .bold))
+                    Text("COMMAND").font(.stencil(12))
+                }
+                .frame(maxWidth: .infinity)
             }
-            .arrangementViewStyle(.split)
-        } else {
-            sideBySide
+            .buttonStyle(IconButtonStyle(height: 54))
+            .padding(.horizontal, 10)
+            .accessibilityLabel("Show Command")
+            .accessibilityIdentifier("command-show")
+            SupplyLabel(amount: session.supply, size: 18)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Supply \(session.supply)")
+                .accessibilityIdentifier("supply")
+            Text("\(session.kills) KILLS").font(.stencil(12)).foregroundStyle(Theme.dim)
+            Spacer(minLength: 0)
+            ControlBar(session: session, column: true)
         }
-        #endif
-    }
-
-    private var sideBySide: some View {
-        HStack(spacing: 0) {
-            map
-            Rectangle().fill(Theme.edge).frame(width: 1).ignoresSafeArea()
-            panel
-        }
+        .padding(.top, 12)
+        .frame(width: Self.width)
+        .frame(maxHeight: .infinity)
+        .background(Theme.panel)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("command-rail")
     }
 }
 

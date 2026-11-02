@@ -47,6 +47,10 @@ final class GameSession {
     var placement: Placement?
     /// The see-through panel over the map, folded away to show the whole map.
     var panelCollapsed = false
+    /// The open Duo's Command column, put away so the map has the screen.
+    /// Remembered between games; the automatic checks start with it shown
+    /// unless they ask for "-hideCommand".
+    private(set) var commandHidden = GameSession.savedCommandHidden
     /// 1, 2 or 3 times normal speed.
     var speed = 1
     var isPaused = false
@@ -59,6 +63,20 @@ final class GameSession {
         game = GameState(level: content.levels[levelIndex], catalog: content.catalog)
         scene = BattlefieldScene(session: self)
         refresh()
+    }
+
+    static let commandHiddenKey = "commandHidden"
+
+    private static var savedCommandHidden: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-uiTesting") { return arguments.contains("-hideCommand") }
+        return UserDefaults.standard.bool(forKey: commandHiddenKey)
+    }
+
+    /// Shows or puts away the open Duo's Command column.
+    func toggleCommand() {
+        commandHidden.toggle()
+        UserDefaults.standard.set(commandHidden, forKey: Self.commandHiddenKey)
     }
 
     var level: LevelSpec { game.level }

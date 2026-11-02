@@ -10,9 +10,9 @@ The map always gets as much of the screen as it can take. The panel floats over 
 
 It fits four phones:
 
-- a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top with the panel over it, and supply and the round, pause and speed buttons in a bar under it for one thumb
+- the iPhone Pro, a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top with the panel over it, and supply and the round, pause and speed buttons in a bar under it for one thumb
 - the iPhone Duo folded: the level strip across the top and the battlefield at full height, with the panel as a side bar over its right-hand side holding supply, the positions or a position's card, and the round, pause and speed buttons
-- the iPhone Duo open: battlefield on one half with the positions to drag beside it, and the full command panel (build list with descriptions, position card with its next upgrade or level 3 choice, round intel) on the other
+- the iPhone Duo open: battlefield with the positions to drag beside it, and a narrow Command column on the right (supply, kills, build list with descriptions, position card with its next upgrade or level 3 choice, round intel, and the round, pause and speed buttons). Its Hide button puts it away to a slim rail that keeps supply and the round, pause and speed buttons; cards then show in the panel beside the map. The choice is remembered
 
 ```
 LastPerimeter/
@@ -44,7 +44,7 @@ You need a Mac with Xcode 27.1 or later. A free Apple account is enough to put i
 Every push runs `.github/workflows/checks.yml`:
 
 1. Logic tests on Linux: level data, build and upgrade costs, targeting, and that the first level can be lost and won.
-2. The app on a Mac: it's built once, then played through on iPhone Pro Max, a regular iPhone and iPhone Duo simulators, with screenshots at each step. The Duo simulator can't be unfolded, so the open Duo layout is drawn at the open Duo's size on the Pro Max.
+2. The app on a Mac: it's built once, then played through on the newest iPhone Pro Max, iPhone Pro and iPhone Duo simulators, with screenshots at each step. The Duo simulator can't be unfolded, so the open Duo layout is drawn at the open Duo's size on the Pro Max.
 3. The newest screenshots go to the `screenshots` branch, named after the phone and the step.
 
 ## Art layout

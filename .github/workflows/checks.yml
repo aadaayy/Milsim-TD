@@ -1,7 +1,7 @@
 # Automatic checks.
 #  1. Logic tests: game rules, level data and balance, on Linux (cheap and fast).
-#  2. App: builds the iPhone app once on a Mac, then plays through it on an
-#     iPhone Pro Max, a regular iPhone and an iPhone Duo simulator, one after
+#  2. App: builds the iPhone app once on a Mac, then plays through it on the
+#     newest iPhone Pro Max, iPhone Pro and iPhone Duo simulators, one after
 #     the other, saving screenshots of each step.
 #  3. Publish: puts the newest screenshots on the screenshots branch.
 # Mac minutes are scarce, so: the Mac job waits for the logic tests, notes and
@@ -40,7 +40,7 @@ jobs:
         run: swift test
 
   app:
-    name: App on iPhone Pro Max, iPhone and iPhone Duo
+    name: App on iPhone Pro Max, iPhone Pro and iPhone Duo
     needs: logic
     runs-on: xcode-27
     timeout-minutes: 90
@@ -57,15 +57,12 @@ jobs:
         id: pick
         run: |
           sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)
-          # ArrangementView needs the iOS 27.1 SDK; older Xcode builds the plain side-by-side layout instead.
-          flags=$(python3 -c "v=tuple(int(x) for x in '$sdk'.split('.')[:2]); print('' if v >= (27, 1) else 'NO_DUO_SDK')")
           devices=$(xcrun simctl list devices available)
           promax=$(echo "$devices" | grep -oE "iPhone [0-9]+ Pro Max" | sort -u | tail -1)
-          regular=$(echo "$devices" | grep -oE "iPhone [0-9]+ \(" | sed 's/ ($//' | sort -u | tail -1)
+          pro=$(echo "$devices" | grep -oE "iPhone [0-9]+ Pro \(" | sed 's/ ($//' | sort -u | tail -1)
           duo=$(echo "$devices" | grep -oE "iPhone Duo[^(]*" | sed 's/ *$//' | sort -u | head -1)
-          echo "::notice title=Tools::$(xcodebuild -version | tr '\n' ' ')| iOS SDK $sdk | $promax | $regular | ${duo:-no Duo simulator}"
-          echo "flags=$flags" >> "$GITHUB_OUTPUT"
-          printf '%s\n' "$promax" "$regular" "$duo" | sed '/^$/d' > "$RUNNER_TEMP/phones.txt"
+          echo "::notice title=Tools::$(xcodebuild -version | tr '\n' ' ')| iOS SDK $sdk | $promax | $pro | ${duo:-no Duo simulator}"
+          printf '%s\n' "$promax" "$pro" "$duo" | sed '/^$/d' > "$RUNNER_TEMP/phones.txt"
 
       - name: Build the app and the walk-through
         run: |
@@ -76,8 +73,7 @@ jobs:
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/Build.xcresult \
             CODE_SIGNING_ALLOWED=NO \
-            -quiet \
-            "SWIFT_ACTIVE_COMPILATION_CONDITIONS=\$(inherited) ${{ steps.pick.outputs.flags }}"
+            -quiet
 
       - name: Play through on each phone
         run: |

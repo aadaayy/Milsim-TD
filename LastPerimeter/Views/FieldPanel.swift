@@ -11,8 +11,9 @@ import SwiftUI
 ///   supply and the round buttons stay in the bar under the map.
 /// - folded Duo: a side bar, with supply at the top and the round, pause and
 ///   speed buttons at the bottom, where the thumb rests.
-/// - open Duo: just the positions to drag; cards and what's coming next have
-///   the whole other half of the screen.
+/// - open Duo: just the positions to drag, with cards and what's coming next
+///   in the Command column; when that's put away, this panel shows them as
+///   it does on a phone.
 struct FieldPanel: View {
     enum Mode { case phone, folded, open }
 
@@ -26,8 +27,12 @@ struct FieldPanel: View {
         case card(Int)
     }
 
+    /// On the open Duo the Command column shows cards, the build list and
+    /// what's coming next; when it's put away, this panel shows them instead.
+    private var commandBeside: Bool { mode == .open && !session.commandHidden }
+
     private var content: Content {
-        guard mode != .open else { return .tray }
+        guard !commandBeside else { return .tray }
         switch session.selection {
         case .none: return .tray
         case .tile: return .buildHere
@@ -69,7 +74,7 @@ struct FieldPanel: View {
                 switch content {
                 case .tray:
                     tray
-                    if mode != .open {
+                    if !commandBeside {
                         Divider().overlay(Theme.edge)
                         fitting { MiniWaveIntel(session: session) }
                     }

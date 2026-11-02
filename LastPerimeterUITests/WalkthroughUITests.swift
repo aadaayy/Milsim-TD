@@ -152,17 +152,43 @@ final class WalkthroughUITests: XCTestCase {
         capture(app, "14-open-duo-menu")
         app.terminate()
 
+        // Command shown (the first time), then put away to the rail and brought back.
+        app = launch(["-openDuoPreview", "-play"], landscape: true)
+        XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 20), "The open Duo puts Command beside the map")
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "supply").count, 1, "Supply shows once")
+        capture(app, "15-open-duo-command-shown")
+        element(app, "command-hide").tap()
+        XCTAssertTrue(element(app, "command-rail").waitForExistence(timeout: 5), "Command folds away to a slim rail")
+        XCTAssertFalse(element(app, "command-panel").exists, "...and the Command column is gone")
+        for id in ["start-wave", "pause", "speed", "supply", "cp-health", "tray-rifle_squad"] {
+            XCTAssertTrue(element(app, id).exists, "\(id) stays in reach with Command put away")
+        }
+        sleep(1)
+        capture(app, "16-open-duo-command-hidden")
+        element(app, "command-show").tap()
+        XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 5), "...and comes back")
+        app.terminate()
+
         app = launch(["-openDuoPreview", "-demo", "-startWave", "3", "-warmup", "20", "-selectPosition", "6,5"], landscape: true)
-        XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 20), "The open Duo puts the commands beside the map")
+        XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 20), "The open Duo puts Command beside the map")
         XCTAssertTrue(element(app, "upgrade-3a").waitForExistence(timeout: 10), "The level 3 choice shows with room to explain")
         sleep(2)
-        capture(app, "15-open-duo-battle")
+        capture(app, "17-open-duo-battle")
+        app.terminate()
+
+        // With Command put away, a position's card shows in the panel beside the map.
+        app = launch(["-openDuoPreview", "-hideCommand", "-demo", "-startWave", "3", "-warmup", "20", "-selectPosition", "6,5"], landscape: true)
+        XCTAssertTrue(element(app, "command-rail").waitForExistence(timeout: 20), "Command starts put away when asked")
+        XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 10), "The card shows beside the map instead")
+        XCTAssertTrue(element(app, "start-wave").exists || element(app, "wave-status").exists, "The round button stays in the rail")
+        sleep(2)
+        capture(app, "18-open-duo-battle-command-hidden")
         app.terminate()
 
         app = launch(["-openDuoPreview", "-play", "-selectTile", "2,5"], landscape: true)
         XCTAssertTrue(element(app, "build-menu").waitForExistence(timeout: 20))
         XCTAssertTrue(element(app, "tray-rifle_squad").exists, "The positions to drag sit beside the map")
-        capture(app, "16-open-duo-build")
+        capture(app, "19-open-duo-build")
     }
 }
 

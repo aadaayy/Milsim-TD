@@ -64,6 +64,8 @@ struct ControlBar: View {
     /// The folded Duo's side bar: the round button on its own row, pause and
     /// speed under it. The side bar shows supply at its top instead.
     var column = false
+    /// False where supply is already shown nearby (the open Duo's Command column).
+    var showsSupply = true
 
     var body: some View {
         if column {
@@ -77,7 +79,7 @@ struct ControlBar: View {
             .padding(.vertical, 8)
         } else {
             HStack(spacing: 8) {
-                supply
+                if showsSupply { supply }
                 waveButton
                 pauseAndSpeed
             }
@@ -315,7 +317,7 @@ struct PositionCard: View {
                     columnHeader(type: type, position: position, level: level)
                 } else {
                     HStack(alignment: .top, spacing: 10) {
-                        Portrait(name: level.sprite, size: roomy ? 72 : 52)
+                        Portrait(name: level.sprite, size: roomy ? 60 : 52)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(type.name.uppercased()).font(.stencil(roomy ? 18 : 15)).foregroundStyle(Theme.text)
                             HStack(spacing: 4) {
@@ -323,7 +325,7 @@ struct PositionCard: View {
                                 Text("Level \(position.levelName): \(level.title)")
                                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.sand)
                             }
-                            StatRow(level: level, kills: position.kills)
+                            StatRow(level: level, kills: position.kills, stacked: roomy)
                         }
                         Spacer(minLength: 0)
                         if !roomy { actions(position) }
@@ -334,7 +336,7 @@ struct PositionCard: View {
                     Text(type.manual).font(.system(size: 13)).foregroundStyle(Theme.dim)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if column { columnPriorityPicker(position) } else { priorityPicker(position) }
+                if column || roomy { columnPriorityPicker(position) } else { priorityPicker(position) }
                 if session.game.upgradeOptions(of: position).count > 1 { levelThreeChoice(position) }
                 if column { actions(position) }
                 if roomy {
