@@ -14,8 +14,11 @@ import SwiftUI
 /// - open Duo: just the positions to drag, with cards and what's coming next
 ///   in the Command column; when that's put away, this panel shows them as
 ///   it does on a phone.
+/// - cards: the open Duo with the map turned sideways; the positions to drag
+///   are in the rail beside the map, so this shows only a tapped tile's build
+///   list or a position's card, with a button to close it.
 struct FieldPanel: View {
-    enum Mode { case phone, folded, open }
+    enum Mode { case phone, folded, open, cards }
 
     let session: GameSession
     let mode: Mode
@@ -52,7 +55,9 @@ struct FieldPanel: View {
 
     var body: some View {
         Group {
-            if session.panelCollapsed {
+            if mode == .cards {
+                if content != .tray { expanded }
+            } else if session.panelCollapsed {
                 collapsed
             } else {
                 expanded
@@ -121,6 +126,19 @@ struct FieldPanel: View {
                     .lineLimit(2).minimumScaleFactor(0.8)
             }
             Spacer(minLength: 0)
+            if mode == .cards {
+                Button {
+                    session.selection = .none
+                } label: {
+                    Image(systemName: "xmark").font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.text)
+                        .frame(width: 26, height: 26)
+                        .background(Theme.panelRaised.opacity(0.8), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close")
+                .accessibilityIdentifier("panel-close")
+            } else {
             Button {
                 session.panelCollapsed = true
             } label: {
@@ -132,6 +150,7 @@ struct FieldPanel: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Hide the panel")
             .accessibilityIdentifier("panel-collapse")
+            }
         }
     }
 
@@ -244,6 +263,8 @@ struct TrayItem: View {
     let session: GameSession
     let type: PositionType
     let field: FieldGeometry
+    /// The coordinate space `field` is measured in.
+    var space = FieldGeometry.space
     @GestureState private var dragging = false
 
     var body: some View {
@@ -253,7 +274,7 @@ struct TrayItem: View {
             .opacity(affordable ? 1 : 0.45)
             .contentShape(Rectangle())
             .gesture(
-                DragGesture(minimumDistance: 6, coordinateSpace: .named(FieldGeometry.space))
+                DragGesture(minimumDistance: 6, coordinateSpace: .named(space))
                     .updating($dragging) { _, state, _ in state = true }
                     .onChanged { session.drag(type.id, over: field.tile(under: $0.location)) }
                     .onEnded { session.drop(type.id, on: field.tile(under: $0.location)) }

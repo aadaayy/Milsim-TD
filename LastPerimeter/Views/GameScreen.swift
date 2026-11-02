@@ -8,7 +8,8 @@ import SwiftUI
 /// - upright but stubbier (the folded iPhone Duo): the map at full height,
 ///   with the panel as a side bar holding supply and the round buttons too
 /// - wide (the open iPhone Duo): the map with the positions beside it, and a
-///   narrow Command column on the right that can be put away to a slim rail
+///   narrow Command column on the right. Put Command away and the map turns
+///   sideways to fill the screen, with a slim rail of positions and buttons
 struct GameScreen: View {
     let session: GameSession
     let onRetry: () -> Void
@@ -43,31 +44,39 @@ struct GameScreen: View {
     }
 }
 
-/// The open Duo: the map, with the positions to drag beside it, and on the
-/// right either the Command column or, when that's put away, a slim rail that
-/// keeps supply and the round, pause and speed buttons in reach. The map is
-/// as tall as the screen allows either way; putting Command away gives the
-/// map's side of the screen more room around it.
+/// The open Duo, two ways:
+/// - Command shown: the map upright with the positions to drag beside it,
+///   and the Command column on the right.
+/// - Command put away: the map turned sideways, so it fills the screen's
+///   width and comes out much bigger, with a slim rail on the right holding
+///   the positions to drag, supply and the round, pause and speed buttons.
+///   A tapped tile or position opens its card over the map.
 struct WideGameLayout: View {
     let session: GameSession
     let onMenu: () -> Void
+    /// The coordinate space the rail's positions are dragged in.
+    static let space = "wide"
+    @State private var railField: FieldGeometry?
 
     var body: some View {
+        let hidden = session.commandHidden
         HStack(spacing: 0) {
             VStack(spacing: 0) {
-                TopStrip(session: session, onMenu: onMenu)
-                MapView(session: session, panel: .open)
+                TopStrip(session: session, onMenu: onMenu, showsNext: hidden)
+                MapView(session: session, panel: hidden ? .cards : .open, sideways: hidden)
             }
             Rectangle().fill(Theme.edge).frame(width: 1).ignoresSafeArea()
-            if session.commandHidden {
-                CommandRail(session: session)
+            if hidden {
+                CommandRail(session: session, field: railField)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
                 CommandPanel(session: session)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
-        .animation(.easeOut(duration: 0.2), value: session.commandHidden)
+        .coordinateSpace(.named(Self.space))
+        .onPreferenceChange(RailFieldKey.self) { railField = $0 }
+        .animation(.easeOut(duration: 0.2), value: hidden)
     }
 }
 
@@ -131,23 +140,24 @@ struct CommandPanel: View {
 }
 
 /// The open Duo's Command column put away: a slim rail with the button to
-/// bring it back, supply and kills at the top and the round, pause and speed
-/// buttons at the bottom. Cards and the build list show in the panel beside
-/// the map meanwhile.
+/// bring it back, supply, the positions to drag onto the map, and the round,
+/// pause and speed buttons at the bottom.
 struct CommandRail: View {
     let session: GameSession
+    /// Where the sideways map sits, as the rail sees it; nil until it's laid out.
+    let field: FieldGeometry?
     static let width: CGFloat = 124
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             Button(action: session.toggleCommand) {
-                VStack(spacing: 4) {
-                    Image(systemName: "chevron.left").font(.system(size: 13, weight: .bold))
+                HStack(spacing: 4) {
+                    Image(systemName: "chevron.left").font(.system(size: 12, weight: .bold))
                     Text("COMMAND").font(.stencil(12))
                 }
                 .frame(maxWidth: .infinity)
             }
-            .buttonStyle(IconButtonStyle(height: 54))
+            .buttonStyle(IconButtonStyle(height: 40))
             .padding(.horizontal, 10)
             .accessibilityLabel("Show Command")
             .accessibilityIdentifier("command-show")
@@ -155,11 +165,26 @@ struct CommandRail: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Supply \(session.supply)")
                 .accessibilityIdentifier("supply")
-            Text("\(session.kills) KILLS").font(.stencil(12)).foregroundStyle(Theme.dim)
+            Divider().overlay(Theme.edge)
+            VStack(spacing: 6) {
+                Text("DRAG TO BUILD").font(.stencil(10)).foregroundStyle(Theme.dim)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ForEach(session.catalog.positions) { type in
+                    if let field {
+                        TrayItem(session: session, type: type, field: field, space: WideGameLayout.space)
+                    } else {
+                        DefenseTile(type: type, highlighted: false)
+                    }
+                }
+            }
+            .padding(.horizontal, 10)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("tray")
             Spacer(minLength: 0)
+            Divider().overlay(Theme.edge)
             ControlBar(session: session, column: true)
         }
-        .padding(.top, 12)
+        .padding(.top, 10)
         .frame(width: Self.width)
         .frame(maxHeight: .infinity)
         .background(Theme.panel)

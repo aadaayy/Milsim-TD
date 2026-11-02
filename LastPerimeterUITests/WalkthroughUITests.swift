@@ -36,6 +36,16 @@ final class WalkthroughUITests: XCTestCase {
                                  dy: map.minY + (CGFloat(row) + 0.5) * size.height))
     }
 
+    /// The middle of a map tile when the open Duo draws the map sideways (Command
+    /// put away): the map's top on the left, its left-hand edge along the bottom.
+    private func sidewaysTile(_ app: XCUIApplication, _ col: Int, _ row: Int) -> XCUICoordinate {
+        let map = element(app, "battlefield").frame
+        let size = CGSize(width: map.width / 15, height: map.height / 9)
+        return app.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: map.minX + (CGFloat(row) + 0.5) * size.width,
+                                 dy: map.minY + (CGFloat(8 - col) + 0.5) * size.height))
+    }
+
     /// Drags a position from the panel onto a tile. A dragged position lands
     /// on the tile just above the fingertip, so the finger stops a little lower.
     private func drag(_ app: XCUIApplication, _ type: String, toCol col: Int, row: Int) {
@@ -163,8 +173,19 @@ final class WalkthroughUITests: XCTestCase {
         for id in ["start-wave", "pause", "speed", "supply", "cp-health", "tray-rifle_squad"] {
             XCTAssertTrue(element(app, id).exists, "\(id) stays in reach with Command put away")
         }
+        let map = element(app, "battlefield").frame
+        XCTAssertGreaterThan(map.width, map.height, "With Command put away the map turns sideways to fill the screen")
         sleep(1)
         capture(app, "16-open-duo-command-hidden")
+        // Drag a rifle squad from the rail onto the sideways map. The tile it
+        // lands on is a little above the finger, so the finger stops lower.
+        let from = element(app, "tray-rifle_squad").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let to = sidewaysTile(app, 3, 3).withOffset(CGVector(dx: 0, dy: map.height / 9 * 0.6))
+        from.press(forDuration: 0.2, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.3)
+        XCTAssertTrue(element(app, "position-3-3").waitForExistence(timeout: 5), "Dragging from the rail builds on the sideways map")
+        XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 5), "The new position's card opens over the map")
+        sleep(1)
+        capture(app, "17-open-duo-hidden-dragged")
         element(app, "command-show").tap()
         XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 5), "...and comes back")
         app.terminate()
@@ -173,7 +194,7 @@ final class WalkthroughUITests: XCTestCase {
         XCTAssertTrue(element(app, "command-panel").waitForExistence(timeout: 20), "The open Duo puts Command beside the map")
         XCTAssertTrue(element(app, "upgrade-3a").waitForExistence(timeout: 10), "The level 3 choice shows with room to explain")
         sleep(2)
-        capture(app, "17-open-duo-battle")
+        capture(app, "18-open-duo-battle")
         app.terminate()
 
         // With Command put away, a position's card shows in the panel beside the map.
@@ -182,13 +203,13 @@ final class WalkthroughUITests: XCTestCase {
         XCTAssertTrue(element(app, "position-card").waitForExistence(timeout: 10), "The card shows beside the map instead")
         XCTAssertTrue(element(app, "start-wave").exists || element(app, "wave-status").exists, "The round button stays in the rail")
         sleep(2)
-        capture(app, "18-open-duo-battle-command-hidden")
+        capture(app, "19-open-duo-battle-command-hidden")
         app.terminate()
 
         app = launch(["-openDuoPreview", "-play", "-selectTile", "2,5"], landscape: true)
         XCTAssertTrue(element(app, "build-menu").waitForExistence(timeout: 20))
         XCTAssertTrue(element(app, "tray-rifle_squad").exists, "The positions to drag sit beside the map")
-        capture(app, "19-open-duo-build")
+        capture(app, "20-open-duo-build")
     }
 }
 

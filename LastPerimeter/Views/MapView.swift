@@ -3,13 +3,17 @@ import SwiftUI
 
 /// Where the map sits inside the battlefield's space, so a finger's point can
 /// be turned into a tile.
-struct FieldGeometry {
-    /// The map's top-left corner, in the "field" coordinate space.
+struct FieldGeometry: Equatable {
+    /// The map's top-left corner, in the coordinate space a drag reports in.
     var origin: CGPoint
     /// Screen points per scene point.
     var scale: CGFloat
+    /// The map's own columns and rows (9 by 15 for the first map).
     var cols: Int
     var rows: Int
+    /// Drawn turned a quarter to the left: the map's top on the left, its
+    /// left-hand edge along the bottom.
+    var sideways = false
 
     /// The name of the battlefield's coordinate space, shared by the map and the panel over it.
     static let space = "field"
@@ -17,18 +21,39 @@ struct FieldGeometry {
     static let lift: CGFloat = 34
 
     var tileSize: CGFloat { BattlefieldScene.tile * scale }
-    var mapSize: CGSize { CGSize(width: CGFloat(cols) * tileSize, height: CGFloat(rows) * tileSize) }
+    /// Tiles across and down the screen.
+    var screenCols: Int { sideways ? rows : cols }
+    var screenRows: Int { sideways ? cols : rows }
+    var mapSize: CGSize { CGSize(width: CGFloat(screenCols) * tileSize, height: CGFloat(screenRows) * tileSize) }
 
     /// The tile a dragged position would land on with the finger at `point`, or nil off the map.
     func tile(under point: CGPoint) -> TileCoord? {
         let x = (point.x - origin.x) / tileSize
         let y = (point.y - Self.lift - origin.y) / tileSize
-        guard x >= 0, y >= 0, x < CGFloat(cols), y < CGFloat(rows) else { return nil }
-        return TileCoord(Int(x), Int(y))
+        guard x >= 0, y >= 0, x < CGFloat(screenCols), y < CGFloat(screenRows) else { return nil }
+        // Sideways, a screen column is a map row and a screen row counts the map's columns from the right.
+        return sideways ? TileCoord(cols - 1 - Int(y), Int(x)) : TileCoord(Int(x), Int(y))
     }
 
     func center(of tile: TileCoord) -> CGPoint {
-        CGPoint(x: origin.x + (CGFloat(tile.col) + 0.5) * tileSize, y: origin.y + (CGFloat(tile.row) + 0.5) * tileSize)
+        let (x, y) = sideways ? (CGFloat(tile.row), CGFloat(cols - 1 - tile.col)) : (CGFloat(tile.col), CGFloat(tile.row))
+        return CGPoint(x: origin.x + (x + 0.5) * tileSize, y: origin.y + (y + 0.5) * tileSize)
+    }
+
+    /// The same map seen from another coordinate space, whose origin is `offset` away.
+    func shifted(by offset: CGPoint) -> FieldGeometry {
+        var moved = self
+        moved.origin = CGPoint(x: origin.x + offset.x, y: origin.y + offset.y)
+        return moved
+    }
+}
+
+/// The open Duo's map, as the slim rail beside it sees it, so positions can be
+/// dragged from the rail onto it.
+struct RailFieldKey: PreferenceKey {
+    static let defaultValue: FieldGeometry? = nil
+    static func reduce(value: inout FieldGeometry?, nextValue: () -> FieldGeometry?) {
+        value = nextValue() ?? value
     }
 }
 
@@ -39,20 +64,23 @@ struct FieldGeometry {
 struct MapView: View {
     let session: GameSession
     var panel: FieldPanel.Mode = .phone
+    /// Drawn turned a quarter to the left, to fill a wide screen.
+    var sideways = false
 
     var body: some View {
         GeometryReader { geometry in
-            let scene = session.scene!
-            let scale = min(geometry.size.width / scene.size.width, geometry.size.height / scene.size.height)
-            let spare = geometry.size.width - scene.size.width * scale
-            // The open Duo's half is wider than the map: the map moves over so
-            // the panel can sit in the room beside it instead of on top of it.
+            let full = BattlefieldScene.size(cols: session.level.cols, rows: session.level.rows, sideways: sideways)
+            let scale = min(geometry.size.width / full.width, geometry.size.height / full.height)
+            let spare = geometry.size.width - full.width * scale
+            // The open Duo's map moves over so the panel can sit in the room
+            // beside it instead of on top of it.
             let left = panel == .open ? max(0, min(spare / 2, spare - FieldPanel.openWidth)) : spare / 2
             let field = FieldGeometry(
-                origin: CGPoint(x: left, y: (geometry.size.height - scene.size.height * scale) / 2),
-                scale: scale, cols: session.level.cols, rows: session.level.rows)
+                origin: CGPoint(x: left, y: (geometry.size.height - full.height * scale) / 2),
+                scale: scale, cols: session.level.cols, rows: session.level.rows, sideways: sideways)
+            let wide = geometry.frame(in: .named(WideGameLayout.space)).origin
             ZStack(alignment: .topLeading) {
-                SpriteView(scene: scene, preferredFramesPerSecond: 60, options: [.ignoresSiblingOrder])
+                SpriteView(scene: session.scene, preferredFramesPerSecond: 60, options: [.ignoresSiblingOrder])
                     .frame(width: field.mapSize.width, height: field.mapSize.height)
                     .offset(x: field.origin.x, y: field.origin.y)
                     .accessibilityIdentifier("battlefield")
@@ -72,8 +100,11 @@ struct MapView: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
             .coordinateSpace(.named(FieldGeometry.space))
+            .preference(key: RailFieldKey.self, value: panel == .cards ? field.shifted(by: wide) : nil)
         }
         .background(Theme.mapSurround)
+        .onAppear { session.scene.setSideways(sideways) }
+        .onChange(of: sideways) { _, now in session.scene.setSideways(now) }
     }
 
     /// Shown over the map while the game is paused, so it can't be missed.

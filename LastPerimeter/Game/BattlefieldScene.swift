@@ -6,6 +6,11 @@ import SpriteKit
 ///
 /// Scene units: one map tile is `tile` points. The map's rows count down the
 /// screen, SpriteKit's y counts up, so `point(_:)` flips them.
+///
+/// On a wide screen the map can be drawn sideways (turned a quarter to the
+/// left, so the road comes in from the left and the Command Post sits on the
+/// right). Only the drawing turns: the game, its tiles and its numbers stay
+/// the same, and soldiers and zombies face the way they really move.
 final class BattlefieldScene: SKScene {
     static let tile: CGFloat = 64
     /// Built positions are drawn this many tiles across at most, so neighbors
@@ -21,6 +26,10 @@ final class BattlefieldScene: SKScene {
 
     private let ground = SKNode()
     private let actors = SKNode()
+    /// Trees, roofs and the Command Post (inside `actors`, so they sort by depth with everything else).
+    private let scenery = SKNode()
+    /// Drawn turned a quarter to the left, for wide screens.
+    private(set) var sideways = false
     private let effects = SKNode()
     private let overlay = SKNode()
 
@@ -55,6 +64,7 @@ final class BattlefieldScene: SKScene {
         anchorPoint = .zero
         backgroundColor = Theme.mapEdgeUI
         for layer in [ground, actors, effects, overlay] { addChild(layer) }
+        actors.addChild(scenery)
         overlay.zPosition = 50
         effects.zPosition = 500
         buildMap()
@@ -65,19 +75,57 @@ final class BattlefieldScene: SKScene {
 
     // MARK: Coordinates and textures
 
+    /// The scene's size for the way the map is drawn.
+    static func size(cols: Int, rows: Int, sideways: Bool) -> CGSize {
+        let w = CGFloat(cols) * tile, h = CGFloat(rows) * tile
+        return sideways ? CGSize(width: h, height: w) : CGSize(width: w, height: h)
+    }
+
+    /// A map point as a scene point. Sideways, the map's top is on the left
+    /// and its left-hand edge along the bottom.
     private func point(_ v: Vec2) -> CGPoint {
-        CGPoint(x: CGFloat(v.x) * Self.tile, y: (CGFloat(level.rows) - CGFloat(v.y)) * Self.tile)
+        if sideways { return CGPoint(x: CGFloat(v.y) * Self.tile, y: CGFloat(v.x) * Self.tile) }
+        return CGPoint(x: CGFloat(v.x) * Self.tile, y: (CGFloat(level.rows) - CGFloat(v.y)) * Self.tile)
     }
 
     /// A map direction (y down) as a scene direction (y up).
-    private func sceneDirection(_ v: Vec2) -> CGVector { CGVector(dx: v.x, dy: -v.y) }
+    private func sceneDirection(_ v: Vec2) -> CGVector {
+        sideways ? CGVector(dx: v.y, dy: v.x) : CGVector(dx: v.x, dy: -v.y)
+    }
+
+    /// A map direction as the direction it points on screen (y down), for
+    /// picking which way a sprite faces.
+    private func screenDirection(_ v: Vec2) -> Vec2 { sideways ? Vec2(v.y, -v.x) : v }
 
     private func mapPoint(_ p: CGPoint) -> Vec2 {
-        Vec2(Double(p.x / Self.tile), Double(level.rows) - Double(p.y / Self.tile))
+        if sideways { return Vec2(Double(p.y / Self.tile), Double(p.x / Self.tile)) }
+        return Vec2(Double(p.x / Self.tile), Double(level.rows) - Double(p.y / Self.tile))
     }
 
     /// Nearer the bottom of the screen draws in front.
-    private func depth(_ v: Vec2) -> CGFloat { 100 + CGFloat(v.y) }
+    private func depth(_ v: Vec2) -> CGFloat { 100 + (sideways ? CGFloat(level.cols) - CGFloat(v.x) : CGFloat(v.y)) }
+
+    /// Turns the drawing sideways or back, redrawing the map and everything on it.
+    func setSideways(_ turned: Bool) {
+        guard turned != sideways else { return }
+        sideways = turned
+        size = Self.size(cols: level.cols, rows: level.rows, sideways: turned)
+        ground.removeAllChildren()
+        scenery.removeAllChildren()
+        for node in positionNodes.values { node.removeFromParent() }
+        for node in zombieNodes.values { node.removeFromParent() }
+        positionNodes = [:]
+        zombieNodes = [:]
+        effects.removeAllChildren()
+        placementNode?.removeFromParent()
+        placementNode = nil
+        drawnPlacement = nil
+        selectionNode?.removeFromParent()
+        selectionNode = nil
+        drawnSelection = nil
+        commandPostState = "intact"
+        buildMap()
+    }
 
     private func texture(_ atlas: String, _ name: String) -> SKTexture {
         let a = atlases[atlas] ?? SKTextureAtlas(named: atlas)
@@ -145,8 +193,9 @@ final class BattlefieldScene: SKScene {
         // The tile grid over open ground, faint until a position is being placed.
         let lines = CGMutablePath()
         for tile in game.buildable {
-            let corner = point(Vec2(Double(tile.col), Double(tile.row + 1)))
-            lines.addRect(CGRect(x: corner.x, y: corner.y, width: Self.tile, height: Self.tile).insetBy(dx: 1.5, dy: 1.5))
+            let center = point(tile.center)
+            lines.addRect(CGRect(x: center.x - Self.tile / 2, y: center.y - Self.tile / 2, width: Self.tile, height: Self.tile)
+                .insetBy(dx: 1.5, dy: 1.5))
         }
         grid.path = lines
         grid.strokeColor = UIColor(white: 1, alpha: 1)
@@ -168,7 +217,7 @@ final class BattlefieldScene: SKScene {
                         tree.size = CGSize(width: s, height: s)
                         tree.position = point(spot)
                         tree.zPosition = depth(spot) + 0.4
-                        actors.addChild(tree)
+                        scenery.addChild(tree)
                     }
                 case .tinRoof, .flatRoof:
                     let tin = level.tile(col: col, row: row) == .tinRoof
@@ -177,7 +226,9 @@ final class BattlefieldScene: SKScene {
                                     : CGSize(width: Self.tile * 1.15, height: Self.tile * 1.15)
                     roof.position = point(center)
                     roof.zPosition = depth(center)
-                    actors.addChild(roof)
+                    // Roofs are flat, so they turn with the map.
+                    roof.zRotation = sideways ? .pi / 2 : 0
+                    scenery.addChild(roof)
                 default:
                     break
                 }
@@ -196,7 +247,7 @@ final class BattlefieldScene: SKScene {
             top.position = CGPoint(x: meters(cp.offsetM[0]) * k, y: meters(cp.offsetM[1]) * k)
             top.zPosition = 0.1
             base.addChild(top)
-            actors.addChild(base)
+            scenery.addChild(base)
             commandPostBase = base
             commandPostTop = top
         }
@@ -262,7 +313,7 @@ final class BattlefieldScene: SKScene {
         case .killed(let id, let type, let at, let heading):
             guard let node = zombieNodes.removeValue(forKey: id) else { return }
             node.die(texture: { self.texture(type, $0) }, sprite: sprites.zombies[type],
-                     facing: Facing(fourWay: heading), at: point(at))
+                     facing: Facing(fourWay: screenDirection(heading)), at: point(at))
         case .breached(let id):
             zombieNodes.removeValue(forKey: id)?.removeFromParent()
             if let base = commandPostBase {
@@ -326,7 +377,7 @@ final class BattlefieldScene: SKScene {
             let walk = sprite.anims["walk"]
             let count = walk?.frames ?? 1
             let frame = Int(node.walkClock * (walk?.fps ?? 8)) % max(count, 1)
-            let facing = Facing(direction: game.track.direction(at: zombie.distance))
+            let facing = Facing(direction: screenDirection(game.track.direction(at: zombie.distance)))
             node.body.texture = texture(sprite.atlas, "\(sprite.atlas)_walk_\(frame)_\(facing.rawValue)")
             node.setHealth(zombie.health / zombie.maxHealth)
         }
@@ -353,7 +404,7 @@ final class BattlefieldScene: SKScene {
                 node = made
             }
             guard let node else { continue }
-            let facing = Facing(direction: position.aim).rawValue
+            let facing = Facing(direction: screenDirection(position.aim)).rawValue
             let firing = clock - node.lastShot < 0.14
             let frames = sprite.frames
             let frame = firing && frames.count > 1 ? frames[1 + Int(clock * 18) % (frames.count - 1)] : frames[0]

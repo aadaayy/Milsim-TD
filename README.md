@@ -12,7 +12,7 @@ It fits four phones:
 
 - the iPhone Pro, a regular iPhone and the iPhone Pro Max, in portrait: battlefield on top with the panel over it, and supply and the round, pause and speed buttons in a bar under it for one thumb
 - the iPhone Duo folded: the level strip across the top and the battlefield at full height, with the panel as a side bar over its right-hand side holding supply, the positions or a position's card, and the round, pause and speed buttons
-- the iPhone Duo open: battlefield with the positions to drag beside it, and a narrow Command column on the right (supply, kills, build list with descriptions, position card with its next upgrade or level 3 choice, round intel, and the round, pause and speed buttons). Its Hide button puts it away to a slim rail that keeps supply and the round, pause and speed buttons; cards then show in the panel beside the map. The choice is remembered
+- the iPhone Duo open: battlefield with the positions to drag beside it, and a narrow Command column on the right (supply, kills, build list with descriptions, position card with its next upgrade or level 3 choice, round intel, and the round, pause and speed buttons). Its Hide button puts it away: the map then turns sideways (road coming in from the left, Command Post on the right) so it fills the screen's width and comes out much bigger, with a slim rail on the right holding the positions to drag, supply and the round, pause and speed buttons, and the next round in the strip over the map. Tapped tiles and positions open their card over the map. Only the drawing turns; the map, its tiles and the balance are the same. The choice is remembered
 
 ```
 LastPerimeter/

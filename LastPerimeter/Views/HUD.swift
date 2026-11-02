@@ -4,6 +4,8 @@ import SwiftUI
 struct TopStrip: View {
     let session: GameSession
     let onMenu: () -> Void
+    /// What the next round holds, in a short row (the open Duo with Command put away).
+    var showsNext = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -21,6 +23,10 @@ struct TopStrip: View {
                 Text(session.level.name.uppercased())
                     .font(.stencil(16)).foregroundStyle(Theme.text)
             }
+            if showsNext {
+                Spacer(minLength: 4)
+                NextRoundStrip(session: session)
+            }
             Spacer(minLength: 4)
             Text("ROUND \(max(session.wavesStarted, 1))/\(session.game.waveCount)")
                 .font(.stencil(15)).foregroundStyle(Theme.text)
@@ -30,6 +36,44 @@ struct TopStrip: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 46)
+    }
+}
+
+/// The next round in one short row: each kind of zombie's picture and count.
+struct NextRoundStrip: View {
+    let session: GameSession
+
+    var body: some View {
+        let onNow: Bool = { if case .wave = session.phase { return true }; return false }()
+        let index = onNow ? session.wavesStarted - 1 : session.wavesStarted
+        if let wave = session.level.waves[safe: index] {
+            HStack(spacing: 8) {
+                Text(onNow ? "ON THE ROAD" : "NEXT").font(.stencil(11)).foregroundStyle(Theme.dim)
+                if wave.boss == true {
+                    Text("BOSS").font(.stencil(10)).foregroundStyle(Theme.background)
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(Theme.alert, in: Capsule())
+                }
+                ForEach(wave.counts.prefix(4).map { $0.zombie }, id: \.self) { zombieID in
+                    let count = wave.counts.first(where: { $0.zombie == zombieID })?.count ?? 0
+                    if let zombie = session.catalog.zombie(zombieID) {
+                        HStack(spacing: 3) {
+                            Portrait(name: zombie.id, size: 26)
+                            Text("×\(count)").font(.stencil(13))
+                                .foregroundStyle(zombie.boss == true ? Theme.alert : Theme.text)
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(count) \(zombie.name)")
+                    }
+                }
+                if wave.counts.count > 4 {
+                    Text("+\(wave.counts.count - 4)").font(.stencil(12)).foregroundStyle(Theme.dim)
+                }
+            }
+            .lineLimit(1)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("next-round")
+        }
     }
 }
 
