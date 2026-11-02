@@ -54,8 +54,9 @@ final class GameSession {
     /// 1, 2 or 3 times normal speed.
     var speed = 1
     var isPaused = false
-    /// While a screenshot setup plays ahead, the scene doesn't move the game itself.
-    private var isSettingUp = false
+    /// While a screenshot setup plays ahead, the scene doesn't move the game itself,
+    /// and the battlefield isn't drawn, so the app stays responsive.
+    private(set) var isSettingUp = false
 
     init(content: GameContent = .shared, levelIndex: Int = 0) {
         self.content = content

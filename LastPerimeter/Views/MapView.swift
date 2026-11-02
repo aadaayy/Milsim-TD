@@ -112,7 +112,7 @@ struct MapView: View {
             // The panel reaches the play area's right-hand edge (just the map's, when it only shows cards).
             let panelRight = panel == .cards ? field.origin.x + field.mapSize.width : insets.leading + playWidth
             ZStack(alignment: .topLeading) {
-                SpriteView(scene: session.scene, preferredFramesPerSecond: 60, options: [.ignoresSiblingOrder])
+                SpriteView(scene: session.scene, isPaused: session.isSettingUp, preferredFramesPerSecond: 60, options: [.ignoresSiblingOrder])
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .accessibilityHidden(true)
                 Color.clear
