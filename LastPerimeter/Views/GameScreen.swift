@@ -1,8 +1,10 @@
 import SwiftUI
 
 /// A level being played, laid out for the shape of the screen. Every layout
-/// gives the map as much room as it can take, with a see-through panel
-/// floating over its right-hand side to drag positions from:
+/// is edge to edge: the battlefield fills the whole screen (with open country
+/// past the map's own edges), the strips and bars float over it, and the map
+/// gets as much room as it can take, with a see-through panel at its
+/// right-hand side to drag positions from:
 /// - tall and narrow (a regular iPhone or Pro Max, upright): the map with
 ///   supply and the round buttons in a bar under it, within thumb reach
 /// - upright but stubbier (the folded iPhone Duo): the map at full height,
@@ -20,20 +22,34 @@ struct GameScreen: View {
             let wide = geometry.size.width > geometry.size.height * 1.05
             // Regular iPhones are about twice as tall as wide; the folded Duo is stubbier.
             let sideBar = !wide && geometry.size.height < geometry.size.width * 1.85
+            let safe = geometry.safeAreaInsets
             ZStack {
                 Theme.background.ignoresSafeArea()
                 if wide {
-                    WideGameLayout(session: session, onMenu: onMenu)
+                    WideGameLayout(session: session, onMenu: onMenu, safe: safe)
                 } else if sideBar {
-                    VStack(spacing: 0) {
+                    ZStack(alignment: .top) {
+                        MapView(session: session, panel: .folded,
+                                insets: EdgeInsets(top: safe.top + TopStrip.height, leading: safe.leading,
+                                                   bottom: safe.bottom, trailing: safe.trailing))
+                            .ignoresSafeArea()
                         TopStrip(session: session, onMenu: onMenu)
-                        MapView(session: session, panel: .folded)
+                            .hudBand(.top)
                     }
                 } else {
-                    VStack(spacing: 0) {
-                        TopStrip(session: session, onMenu: onMenu)
-                        MapView(session: session, panel: .phone)
-                        ControlBar(session: session)
+                    ZStack {
+                        MapView(session: session, panel: .phone,
+                                insets: EdgeInsets(top: safe.top + TopStrip.height, leading: safe.leading,
+                                                   bottom: safe.bottom + ControlBar.rowHeight, trailing: safe.trailing))
+                            .ignoresSafeArea()
+                        VStack(spacing: 0) {
+                            TopStrip(session: session, onMenu: onMenu)
+                                .hudBand(.top)
+                            Spacer(minLength: 0)
+                            ControlBar(session: session)
+                                .frame(height: ControlBar.rowHeight)
+                                .hudBand(.bottom)
+                        }
                     }
                 }
                 if session.isOver {
@@ -54,6 +70,8 @@ struct GameScreen: View {
 struct WideGameLayout: View {
     let session: GameSession
     let onMenu: () -> Void
+    /// The screen's safe area, which the battlefield reaches into.
+    let safe: EdgeInsets
     /// The coordinate space the rail's positions are dragged in.
     static let space = "wide"
     @State private var railField: FieldGeometry?
@@ -61,9 +79,13 @@ struct WideGameLayout: View {
     var body: some View {
         let hidden = session.commandHidden
         HStack(spacing: 0) {
-            VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                MapView(session: session, panel: hidden ? .cards : .open, sideways: hidden,
+                        insets: EdgeInsets(top: safe.top + TopStrip.height, leading: safe.leading,
+                                           bottom: safe.bottom, trailing: 0))
+                    .ignoresSafeArea(edges: [.top, .bottom, .leading])
                 TopStrip(session: session, onMenu: onMenu, showsNext: hidden)
-                MapView(session: session, panel: hidden ? .cards : .open, sideways: hidden)
+                    .hudBand(.top)
             }
             Rectangle().fill(Theme.edge).frame(width: 1).ignoresSafeArea()
             if hidden {
@@ -133,7 +155,7 @@ struct CommandPanel: View {
         .padding(.top, 12)
         .frame(width: Self.width)
         .frame(maxHeight: .infinity)
-        .background(Theme.panel)
+        .background(Theme.panel.ignoresSafeArea())
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("command-panel")
     }
@@ -187,7 +209,7 @@ struct CommandRail: View {
         .padding(.top, 10)
         .frame(width: Self.width)
         .frame(maxHeight: .infinity)
-        .background(Theme.panel)
+        .background(Theme.panel.ignoresSafeArea())
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("command-rail")
     }

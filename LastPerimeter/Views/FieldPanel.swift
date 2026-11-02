@@ -45,10 +45,13 @@ struct FieldPanel: View {
 
     /// Room the open Duo's panel takes beside the map, margins included.
     static let openWidth: CGFloat = 106
+    /// The panel's width with the positions in it, on a phone and in the folded Duo's side bar.
+    static let phoneWidth: CGFloat = 94
+    static let foldedWidth: CGFloat = 124
 
     private var width: CGFloat {
         if case .card = content { return 166 }
-        return mode == .folded ? 124 : 94
+        return mode == .folded ? Self.foldedWidth : Self.phoneWidth
     }
 
     private static let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)

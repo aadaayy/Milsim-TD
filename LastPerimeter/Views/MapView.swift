@@ -57,54 +57,93 @@ struct RailFieldKey: PreferenceKey {
     }
 }
 
-/// The battlefield, fitted inside whatever space it's given, with the
-/// see-through panel floating over its right-hand side. Positions are dragged
-/// from the panel onto any open tile. An invisible layer names each built
-/// position for VoiceOver and the automatic checks (taps go straight through).
+/// The battlefield, filling all the space it's given edge to edge. The map
+/// itself is fitted inside that space less `insets` (where the strips and
+/// bars float over it), and past its edges the scene draws more open country,
+/// so there are no empty bars. The panel floats over the map's right-hand
+/// side, or sits in the room beside it when there is some. Positions are
+/// dragged from the panel onto any open tile. An invisible layer names the
+/// map and each built position for VoiceOver and the automatic checks (taps
+/// go straight through).
 struct MapView: View {
     let session: GameSession
     var panel: FieldPanel.Mode = .phone
     /// Drawn turned a quarter to the left, to fill a wide screen.
     var sideways = false
+    /// Room kept clear around the map for the strips and bars over it.
+    var insets = EdgeInsets()
+
+    /// Where the scene sits: its size in scene points, where the map goes in
+    /// it, and which way the map is drawn.
+    private struct SceneLayout: Equatable {
+        var viewport: CGSize
+        var mapOffset: CGPoint
+        var sideways: Bool
+    }
+
+    /// Room the panel takes at the right-hand edge, margins included, so the
+    /// map can move over and leave it free when the screen has room to spare.
+    private var panelRoom: CGFloat {
+        switch panel {
+        case .phone: return FieldPanel.phoneWidth + 12
+        case .folded: return FieldPanel.foldedWidth + 12
+        case .open: return FieldPanel.openWidth
+        case .cards: return 0
+        }
+    }
 
     var body: some View {
         GeometryReader { geometry in
             let full = BattlefieldScene.size(cols: session.level.cols, rows: session.level.rows, sideways: sideways)
-            let scale = min(geometry.size.width / full.width, geometry.size.height / full.height)
-            let spare = geometry.size.width - full.width * scale
-            // The open Duo's map moves over so the panel can sit in the room
-            // beside it instead of on top of it.
-            let left = panel == .open ? max(0, min(spare / 2, spare - FieldPanel.openWidth)) : spare / 2
+            let playWidth = max(1, geometry.size.width - insets.leading - insets.trailing)
+            let playHeight = max(1, geometry.size.height - insets.top - insets.bottom)
+            let scale = min(playWidth / full.width, playHeight / full.height)
+            let spare = playWidth - full.width * scale
+            let left = panel == .cards ? spare / 2 : max(0, min(spare / 2, spare - panelRoom))
             let field = FieldGeometry(
-                origin: CGPoint(x: left, y: (geometry.size.height - full.height * scale) / 2),
+                origin: CGPoint(x: insets.leading + left, y: insets.top + (playHeight - full.height * scale) / 2),
                 scale: scale, cols: session.level.cols, rows: session.level.rows, sideways: sideways)
+            let viewport = CGSize(width: geometry.size.width / scale, height: geometry.size.height / scale)
+            let layout = SceneLayout(
+                viewport: viewport,
+                mapOffset: CGPoint(x: field.origin.x / scale, y: viewport.height - field.origin.y / scale - full.height),
+                sideways: sideways)
             let wide = geometry.frame(in: .named(WideGameLayout.space)).origin
+            // The panel reaches the play area's right-hand edge (just the map's, when it only shows cards).
+            let panelRight = panel == .cards ? field.origin.x + field.mapSize.width : insets.leading + playWidth
             ZStack(alignment: .topLeading) {
                 SpriteView(scene: session.scene, preferredFramesPerSecond: 60, options: [.ignoresSiblingOrder])
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .accessibilityHidden(true)
+                Color.clear
                     .frame(width: field.mapSize.width, height: field.mapSize.height)
-                    .offset(x: field.origin.x, y: field.origin.y)
+                    .accessibilityElement()
+                    .accessibilityLabel("Battlefield")
                     .accessibilityIdentifier("battlefield")
+                    .position(x: field.origin.x + field.mapSize.width / 2, y: field.origin.y + field.mapSize.height / 2)
+                    .allowsHitTesting(false)
                 positionMarkers(field)
                 if session.isPaused && !session.isOver {
                     pausedBanner
                         .frame(width: field.mapSize.width, height: field.mapSize.height)
-                        .offset(x: field.origin.x, y: field.origin.y)
+                        .position(x: field.origin.x + field.mapSize.width / 2, y: field.origin.y + field.mapSize.height / 2)
                 }
-                // The panel keeps to the map's own right-hand edge (on the open
-                // Duo, to the half's edge, beside the map).
                 FieldPanel(session: session, mode: panel, field: field)
-                    .frame(width: panel == .open ? geometry.size.width : field.mapSize.width,
-                           height: field.mapSize.height, alignment: .topTrailing)
-                    .padding(.leading, panel == .open ? 0 : field.origin.x)
+                    .frame(width: max(0, panelRight - field.origin.x), height: field.mapSize.height, alignment: .topTrailing)
+                    .padding(.leading, field.origin.x)
                     .padding(.top, field.origin.y)
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
             .coordinateSpace(.named(FieldGeometry.space))
             .preference(key: RailFieldKey.self, value: panel == .cards ? field.shifted(by: wide) : nil)
+            .onAppear { apply(layout) }
+            .onChange(of: layout) { _, now in apply(now) }
         }
         .background(Theme.mapSurround)
-        .onAppear { session.scene.setSideways(sideways) }
-        .onChange(of: sideways) { _, now in session.scene.setSideways(now) }
+    }
+
+    private func apply(_ layout: SceneLayout) {
+        session.scene.layout(viewport: layout.viewport, mapOffset: layout.mapOffset, sideways: layout.sideways)
     }
 
     /// Shown over the map while the game is paused, so it can't be missed.

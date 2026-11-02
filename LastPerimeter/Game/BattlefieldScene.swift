@@ -30,6 +30,11 @@ final class BattlefieldScene: SKScene {
     private let scenery = SKNode()
     /// Drawn turned a quarter to the left, for wide screens.
     private(set) var sideways = false
+    /// Where the map's bottom-left corner sits in the scene. The scene is as
+    /// big as the screen space it's shown in, so past the map's own edges
+    /// there's more open country (grass, trees and the road running off),
+    /// and no empty bars.
+    private var mapOffset = CGPoint.zero
     private let effects = SKNode()
     private let overlay = SKNode()
 
@@ -84,8 +89,9 @@ final class BattlefieldScene: SKScene {
     /// A map point as a scene point. Sideways, the map's top is on the left
     /// and its left-hand edge along the bottom.
     private func point(_ v: Vec2) -> CGPoint {
-        if sideways { return CGPoint(x: CGFloat(v.y) * Self.tile, y: CGFloat(v.x) * Self.tile) }
-        return CGPoint(x: CGFloat(v.x) * Self.tile, y: (CGFloat(level.rows) - CGFloat(v.y)) * Self.tile)
+        let p = sideways ? CGPoint(x: CGFloat(v.y) * Self.tile, y: CGFloat(v.x) * Self.tile)
+                         : CGPoint(x: CGFloat(v.x) * Self.tile, y: (CGFloat(level.rows) - CGFloat(v.y)) * Self.tile)
+        return CGPoint(x: p.x + mapOffset.x, y: p.y + mapOffset.y)
     }
 
     /// A map direction (y down) as a scene direction (y up).
@@ -97,7 +103,8 @@ final class BattlefieldScene: SKScene {
     /// picking which way a sprite faces.
     private func screenDirection(_ v: Vec2) -> Vec2 { sideways ? Vec2(v.y, -v.x) : v }
 
-    private func mapPoint(_ p: CGPoint) -> Vec2 {
+    private func mapPoint(_ q: CGPoint) -> Vec2 {
+        let p = CGPoint(x: q.x - mapOffset.x, y: q.y - mapOffset.y)
         if sideways { return Vec2(Double(p.y / Self.tile), Double(p.x / Self.tile)) }
         return Vec2(Double(p.x / Self.tile), Double(level.rows) - Double(p.y / Self.tile))
     }
@@ -105,11 +112,17 @@ final class BattlefieldScene: SKScene {
     /// Nearer the bottom of the screen draws in front.
     private func depth(_ v: Vec2) -> CGFloat { 100 + (sideways ? CGFloat(level.cols) - CGFloat(v.x) : CGFloat(v.y)) }
 
-    /// Turns the drawing sideways or back, redrawing the map and everything on it.
-    func setSideways(_ turned: Bool) {
-        guard turned != sideways else { return }
+    /// Fits the scene to the space it's shown in: `viewport` is that space in
+    /// scene points, `mapOffset` where the map's bottom-left corner goes in it,
+    /// and `turned` whether the map is drawn sideways. Redraws the map and
+    /// everything on it when any of them change.
+    func layout(viewport: CGSize, mapOffset offset: CGPoint, sideways turned: Bool) {
+        func near(_ a: CGFloat, _ b: CGFloat) -> Bool { abs(a - b) < 0.5 }
+        guard turned != sideways || !near(viewport.width, size.width) || !near(viewport.height, size.height)
+                || !near(offset.x, mapOffset.x) || !near(offset.y, mapOffset.y) else { return }
         sideways = turned
-        size = Self.size(cols: level.cols, rows: level.rows, sideways: turned)
+        mapOffset = offset
+        size = viewport
         ground.removeAllChildren()
         scenery.removeAllChildren()
         for node in positionNodes.values { node.removeFromParent() }
@@ -176,6 +189,56 @@ final class BattlefieldScene: SKScene {
             patch.zPosition = 1
             ground.addChild(patch)
             d += 0.3
+        }
+
+        // Past the map's edge the road runs on, back the way the horde comes.
+        let start = track.point(at: 0)
+        let back = track.direction(at: 0).normalized
+        // Its own dice, so the map itself looks the same on every screen.
+        var offRoad = SeededRandom(seed: 41)
+        var t = 0.3
+        while t < 40 {
+            let spot = Vec2(start.x - back.x * t, start.y - back.y * t)
+            let at = point(spot)
+            if at.x < -Self.tile * 2 || at.y < -Self.tile * 2 || at.x > size.width + Self.tile * 2 || at.y > size.height + Self.tile * 2 { break }
+            let patch = SKSpriteNode(texture: texture("terrain", "dirt_\(1 + Int(offRoad.next() * 2))"))
+            let s = Self.tile * CGFloat(offRoad.next(in: 1.15...1.4))
+            patch.size = CGSize(width: s, height: s)
+            patch.zRotation = CGFloat(offRoad.next() * .pi * 2)
+            patch.position = at
+            patch.zPosition = 1
+            ground.addChild(patch)
+            t += 0.3
+        }
+
+        // Open country around the map: woods thickening away from it, clear of the road.
+        let corners = [CGPoint.zero, CGPoint(x: size.width, y: 0), CGPoint(x: 0, y: size.height), CGPoint(x: size.width, y: size.height)]
+            .map(mapPoint)
+        let minCol = Int(floor(corners.map(\.x).min() ?? 0)) - 1, maxCol = Int(ceil(corners.map(\.x).max() ?? 0)) + 1
+        let minRow = Int(floor(corners.map(\.y).min() ?? 0)) - 1, maxRow = Int(ceil(corners.map(\.y).max() ?? 0)) + 1
+        if minCol <= maxCol, minRow <= maxRow {
+            for row in minRow...maxRow {
+                for col in minCol...maxCol where col < 0 || row < 0 || col >= level.cols || row >= level.rows {
+                    let center = Vec2(Double(col) + 0.5, Double(row) + 0.5)
+                    // How far outside the map, in tiles, and how close to the road running off.
+                    let out = max(Double(max(-col, col - level.cols + 1, 0)), Double(max(-row, row - level.rows + 1, 0)))
+                    let toStart = center - start
+                    let along = -(toStart.x * back.x + toStart.y * back.y)
+                    let across = abs(toStart.x * back.y - toStart.y * back.x)
+                    if along > -0.5 && across < 1.3 { continue }
+                    var cell = SeededRandom(seed: UInt64(bitPattern: Int64((col + 100) * 1000 + row + 100)))
+                    guard cell.next() < min(0.85, 0.3 + 0.18 * out) else { continue }
+                    for _ in 0..<2 {
+                        let spot = center + Vec2(cell.next(in: -0.3...0.3), cell.next(in: -0.3...0.3))
+                        let tree = SKSpriteNode(texture: texture("terrain", "tree_\(Int(cell.next() * 4))"))
+                        let s = Self.tile * CGFloat(cell.next(in: 0.95...1.3))
+                        tree.size = CGSize(width: s, height: s)
+                        tree.position = point(spot)
+                        tree.zPosition = depth(spot) + 0.4
+                        scenery.addChild(tree)
+                    }
+                }
+            }
         }
 
         // Trampled ground around the Command Post.

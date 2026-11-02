@@ -14,7 +14,8 @@ struct OpenDuoPreview: View {
         GeometryReader { geometry in
             let scale = min(geometry.size.width / Self.openScreen.width, geometry.size.height / Self.openScreen.height)
             RootView()
-                .padding(.top, 24)
+                // The open Duo's top edge, kept clear for the camera like a safe area.
+                .safeAreaPadding(.top, 24)
                 .frame(width: Self.openScreen.width, height: Self.openScreen.height)
                 .background(Theme.background)
                 .environment(\.horizontalSizeClass, .regular)

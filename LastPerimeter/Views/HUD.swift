@@ -35,7 +35,17 @@ struct TopStrip: View {
             CommandPostHealth(session: session)
         }
         .padding(.horizontal, 10)
-        .frame(height: 46)
+        .frame(height: Self.height)
+    }
+
+    static let height: CGFloat = 46
+}
+
+extension View {
+    /// A see-through dark band behind a strip or bar that floats over the
+    /// battlefield, reaching on into the screen's edge on `edges`.
+    func hudBand(_ edges: Edge.Set) -> some View {
+        background(Theme.panel.opacity(0.8), ignoresSafeAreaEdges: edges)
     }
 }
 
@@ -110,6 +120,8 @@ struct ControlBar: View {
     var column = false
     /// False where supply is already shown nearby (the open Duo's Command column).
     var showsSupply = true
+    /// The bar's height along the bottom of a phone, room for the map to keep clear of.
+    static let rowHeight: CGFloat = 58
 
     var body: some View {
         if column {
